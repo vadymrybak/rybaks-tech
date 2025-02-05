@@ -15,7 +15,6 @@
     "hooks:pre-commit": "pnpm run prettier:fix && pnpm run lint:fix && pnpm run stylelint:fix"
   },
   "keywords": [],
-  "author": "llevkin",
   "license": "UNLICENSED",
   "peerDependencies": {
     "react": "^16.11.0"

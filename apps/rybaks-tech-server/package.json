@@ -15,7 +15,6 @@
     "hooks:pre-commit": "pnpm run prettier:fix && pnpm run lint:fix"
   },
   "keywords": [],
-  "author": "llevkin",
   "license": "UNLICENSED",
   "dependencies": {
     "@biorate/axios-prometheus": "1.96.2",

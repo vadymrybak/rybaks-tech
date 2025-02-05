@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "description": "My app name",
   "keywords": [],
-  "author": "llevkin",
   "license": "UNLICENSED",
   "scripts": {
     "build": "npx lerna run build --stream --no-prefix --scope rybaks-tech-client --scope rybaks-tech-server",
