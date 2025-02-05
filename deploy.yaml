@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rybaks-tech
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rybaks-tech
+  template:
+    metadata:
+      labels:
+        app: rybaks-tech
+    spec:
+      containers:
+      - name: rybaks-tech
+        image: rybaks.cr.cloud.ru/rybaks-tech:1.0.1
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 3000
+      imagePullSecrets:
+      - name: regcred
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rybaks-tech
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: rybaks-tech

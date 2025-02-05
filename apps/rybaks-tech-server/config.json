@@ -1,0 +1,8 @@
+{
+  "ConfigLoaderFs": [
+    {
+      "directory": "/configmap",
+      "file": "config.configmap.json"
+    }
+  ]
+}

@@ -1,8 +1,7 @@
 # compiled output
 dist
 node_modules
-tmp
-_tmp
+tests-results
 
 # Logs
 logs
@@ -46,3 +45,7 @@ coverage
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Allure
+allure-results/*
+allure-report/*
