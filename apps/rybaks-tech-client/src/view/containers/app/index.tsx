@@ -19,11 +19,11 @@ export class App extends React.Component<unknown, unknown> {
     return this.preloader.loaded ? (
         <React.Suspense fallback={<Spinner visible={true} />}>
           <Layout>
-            <Slot name={SLOTS.HEADER}></Slot>
+            <Slot name={SLOTS.HEADER}>HEADER</Slot>
             <Slot name={SLOTS.CONTENT}>
               <RouterProvider router={router} />
             </Slot>
-            <Slot name={SLOTS.FOOTER}></Slot>
+            <Slot name={SLOTS.FOOTER}>FOOTER</Slot>
           </Layout>
         </React.Suspense>
     ) : (

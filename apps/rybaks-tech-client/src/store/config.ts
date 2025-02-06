@@ -5,6 +5,9 @@ import { Config as ConfigApi } from '../api';
 @injectable()
 export class Config extends BaseConfig {
   @init() protected async initialize() {
+    console.log(process.env.host ?? location.host);
+    console.log(process.env.baseURL ?? location.origin);
+    
     this.set('location.host', process.env.host ?? location.host);
     this.set('location.baseURL', process.env.baseURL ?? location.origin);
 

@@ -40,7 +40,9 @@ export class Application implements IApplication<Server> {
     this.app.setGlobalPrefix(this.config.get<string>('app.globalPrefix', ''));
     this.app.useGlobalFilters(new AllExceptionsFilter());
     this.app.useGlobalInterceptors(new RoutesInterceptor());
-    this.app.useGlobalPipes(new ValidationPipe());
+    this.app.useGlobalPipes(new ValidationPipe({
+      whitelist: true
+    }));
     this.app.use(
       helmet(
         this.config.get<unknown>('app.middleware.helmet', {

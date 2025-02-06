@@ -1,4 +1,4 @@
-import { container, inject, Core, Types } from '@biorate/inversion';
+import { container, inject, Core, Types, init } from '@biorate/inversion';
 import { IConfig, Config } from '@biorate/config';
 import { ConfigLoader } from '@biorate/config-loader';
 import { ConfigLoaderEnv } from '@biorate/config-loader-env';
@@ -11,7 +11,7 @@ import { ServiceApiSequelizeConnector } from './connectors/SequelizeConnector';
 import { Application } from './application';
 import { IApplication } from './interfaces';
 import { Test } from './test';
-import { DbService } from './services';
+import { AuthService, BJwtService, DbService, JwtStrategy } from './services';
 
 export class Root extends Core() {
   @inject(Types.Config) public readonly config: IConfig;
@@ -28,9 +28,16 @@ export class Root extends Core() {
 
   @inject(Types.ServiceApiSequelizeConnector) public connector: ISequelizeConnector;
 
+  @inject(Types.Test) public readonly test: Test;
+
   @inject(Types.Application) public readonly application: IApplication;
 
-  @inject(Types.Test) public readonly test: Test;
+  @init()
+  public loaded(){
+    // Workaround to initialize Strategy so that I could get config
+    container.get(Types.JwtStrategy);
+  }
+
 }
 
 container.bind<IConfig>(Types.Config).to(Config).inSingletonScope();
@@ -50,3 +57,6 @@ container.bind<Test>(Types.Test).to(Test).inSingletonScope();
 container.bind<Root>(Root).toSelf().inSingletonScope();
 container.bind<ISequelizeConnector>(Types.ServiceApiSequelizeConnector).to(ServiceApiSequelizeConnector).inSingletonScope();
 container.bind<DbService>(Types.DbService).to(DbService).inSingletonScope();
+container.bind<AuthService>(Types.AuthService).to(AuthService).inSingletonScope();
+container.bind<BJwtService>(Types.BJwtService).to(BJwtService).inSingletonScope();
+container.bind<JwtStrategy>(Types.JwtStrategy).to(JwtStrategy).inSingletonScope();
