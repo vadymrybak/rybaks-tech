@@ -9,7 +9,7 @@
     "build": "npx lerna run build --stream --no-prefix --scope rybaks-tech-client --scope rybaks-tech-server",
     "start": "pnpm --prefix apps/rybaks-tech-server start",
     "build:debug": "npx lerna run build:debug --stream --no-prefix --scope rybaks-tech-client",
-    "start:debug": "npx lerna run start:debug --stream --no-prefix --scope rybaks-tech-server",
+    "start:dev": "npx lerna run start:dev --stream --no-prefix --scope rybaks-tech-server",
     "test": "npx lerna run test --stream --no-prefix --scope rybaks-tech-server --scope rybaks-tech-client",
     "migrations": "npx lerna run migrations --stream --no-prefix --scope rybaks-tech-server",
     "test:server": "npx lerna run test --stream --no-prefix --scope rybaks-tech-server",

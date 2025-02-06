@@ -6,9 +6,12 @@ import { ConfigLoaderFs } from '@biorate/config-loader-fs';
 import { ConfigLoaderVault } from '@biorate/config-loader-vault';
 import { Prometheus, IPrometheus } from '@biorate/prometheus';
 import { VaultConnector, IVaultConnector } from '@biorate/vault';
+import { ISequelizeConnector } from '@biorate/sequelize';
+import { ServiceApiSequelizeConnector } from './connectors/SequelizeConnector';
 import { Application } from './application';
 import { IApplication } from './interfaces';
 import { Test } from './test';
+import { DbService } from './services';
 
 export class Root extends Core() {
   @inject(Types.Config) public readonly config: IConfig;
@@ -22,6 +25,8 @@ export class Root extends Core() {
   @inject(Types.Vault) public readonly vault: IVaultConnector;
 
   @inject(Types.Prometheus) public readonly prometheus: IPrometheus;
+
+  @inject(Types.ServiceApiSequelizeConnector) public connector: ISequelizeConnector;
 
   @inject(Types.Application) public readonly application: IApplication;
 
@@ -43,3 +48,5 @@ container.bind<IPrometheus>(Types.Prometheus).to(Prometheus).inSingletonScope();
 container.bind<IApplication>(Types.Application).to(Application).inSingletonScope();
 container.bind<Test>(Types.Test).to(Test).inSingletonScope();
 container.bind<Root>(Root).toSelf().inSingletonScope();
+container.bind<ISequelizeConnector>(Types.ServiceApiSequelizeConnector).to(ServiceApiSequelizeConnector).inSingletonScope();
+container.bind<DbService>(Types.DbService).to(DbService).inSingletonScope();

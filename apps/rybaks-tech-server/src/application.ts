@@ -6,18 +6,16 @@ import { AddressInfo } from 'net';
 import { promisify } from 'util';
 import { urlencoded, json, Request, Response } from 'express';
 import { init, kill, injectable, inject, Types } from '@biorate/inversion';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
 import { IConfig } from '@biorate/config';
 import { path } from '@biorate/tools';
 import {
   RoutesInterceptor,
-  ProxyPrometheusMiddleware,
   AllExceptionsFilter,
 } from '@biorate/nestjs-tools';
 import { IApplication } from './interfaces';
-import { Logger } from './logger';
 import { AppModule } from './app';
 
 @injectable()
@@ -25,8 +23,9 @@ export class Application implements IApplication<Server> {
   @inject(Types.Config) private config: IConfig;
 
   public app: INestApplication<Server>;
-
   public document: OpenAPIObject;
+
+  private readonly logger: Logger = new Logger(Application.name);
 
   @kill() protected async kill() {
     if (!this.app?.getHttpServer) return;
@@ -50,19 +49,6 @@ export class Application implements IApplication<Server> {
       ),
     );
     this.app.use(favicon(path.create(process.cwd(), 'favicon.ico')));
-    // This is just an example of using a proxy, remove it in production.
-    /*
-    this.app.use(
-     '/yandex',
-     ProxyPrometheusMiddleware.create({
-        target: this.config.get<string>('Common.url.yandex', 'https://ya.ru'),
-        pathRewrite: {
-          '^/yandex': '/',
-        },
-        changeOrigin: true,
-      }),
-    );
-    */
     this.app.use(
       json(this.config.get<unknown>('app.middleware.json', { limit: '100mb' })),
     );
@@ -83,7 +69,7 @@ export class Application implements IApplication<Server> {
     this.createSwagger();
     await this.app.listen(port, host, () => {
       const { address, port } = <AddressInfo>this.app.getHttpServer().address();
-      console.info(`Server listen on ${address}:${port}`);
+      this.logger.log(`Server listen on ${address}:${port}`);
     });
   }
 

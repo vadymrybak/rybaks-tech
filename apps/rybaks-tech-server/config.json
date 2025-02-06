@@ -1,8 +1,21 @@
 {
-  "ConfigLoaderFs": [
-    {
-      "directory": "/configmap",
-      "file": "config.configmap.json"
-    }
+  "Sequelize": [
+      {
+          "name": "rybaksTech",
+          "options": {
+              "dialect": "postgres",
+              "database": "#{POSTGRES_DB_NAME}",
+              "username": "#{POSTGRES_USER}",
+              "password": "#{POSTGRES_PASSWORD}",
+              "host": "#{POSTGRES_HOST}",
+              "port": "#{POSTGRES_PORT}",
+              "ssl": false,
+              "pool": {
+                  "max": 5,
+                  "min": 0,
+                  "idle": 10000
+              }
+          }
+      }
   ]
 }
