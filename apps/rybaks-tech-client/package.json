@@ -1,44 +1,29 @@
 {
   "name": "rybaks-tech-client",
+  "private": true,
   "version": "0.0.0",
-  "description": "My app name (client application)",
-  "main": "dist",
+  "type": "module",
   "scripts": {
-    "build": "cross-env NODE_ENV=production npx webpack --config=../../webpack.config.js --mode=production --entry=./src/index.tsx --entry=./src/index.pug --entry=./src/index.less -o ./dist",
-    "build:debug": "npx webpack serve --history-api-fallback --config=../../webpack.config.js --mode=development --hot --open --entry=./src/index.tsx --entry=./src/index.pug --entry=./src/index.less -o ./dist",
-    "test": "npx playwright test",
-    "test:ui": "npx playwright test --ui",
-    "prettier:fix": "npx prettier --write ./src",
-    "lint:fix": "npx eslint --fix ./src",
-    "stylelint:fix": "npx stylelint './src/**/*.{less,css,scss,sass,tsx}' --fix",
-    "allure:report": "npx allure serve allure-results --clean -o allure-report",
-    "hooks:pre-commit": "pnpm run prettier:fix && pnpm run lint:fix && pnpm run stylelint:fix"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
-  "keywords": [],
-  "license": "UNLICENSED",
-  "peerDependencies": {
-    "react": "^16.11.0"
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@ant-design/icons": "4.7.0",
-    "@biorate/playwright": "1.87.0",
-    "@playwright/test": "1.44.0",
-    "@testdeck/core": "0.3.3",
-    "@types/react": "16.14.34",
-    "@types/react-dom": "16.9.17",
-    "@types/react-router": "5.1.18",
-    "antd": "4.21.3",
-    "history": "5.2.0",
-    "i18next": "23.4.2",
-    "i18next-browser-languagedetector": "7.1.0",
-    "i18next-http-backend": "2.2.1",
-    "mobx": "6.3.12",
-    "mobx-react": "7.2.1",
-    "playwright": "1.44.0",
-    "react": "16.11.0",
-    "react-dom": "16.11.0",
-    "react-router": "6.15.0",
-    "react-router-dom": "6.15.0",
-    "styled-components": "6.1.8"
+    "@eslint/js": "^9.19.0",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.19.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.18",
+    "globals": "^15.14.0",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.22.0",
+    "vite": "^6.1.0"
   }
 }
