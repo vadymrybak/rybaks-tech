@@ -5,7 +5,6 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -18,13 +17,10 @@ const pages = ["timeline", "my"];
 const settings = ["Profile", "Account", "Logout"];
 
 function AppHeader() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+  const [, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -42,7 +38,6 @@ function AppHeader() {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-
           <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
 
           <Typography
@@ -70,7 +65,7 @@ function AppHeader() {
               </Button>
             ))}
           </Box>
-          
+
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>

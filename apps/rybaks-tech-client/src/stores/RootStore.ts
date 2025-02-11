@@ -43,7 +43,7 @@ export class RootStore {
     this.isLoggingIn = true;
 
     ApiService.doLogin(username, password).subscribe({
-      next: (data: any) => {
+      next: () => {
         runInAction(() => {
           this.token = getCookieByName("access_token");
           this.isLoggingIn = false;

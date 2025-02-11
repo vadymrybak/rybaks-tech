@@ -4,7 +4,7 @@
   "description": "My app name (server application)",
   "main": "dist",
   "scripts": {
-    "start": "cross-env LOG_ENABLED=1 LOG_LEVEL=info,error,warn NODE_ENV=production node ./dist/index.js",
+    "start": "cross-env LOG_ENABLED=1 NODE_ENV=production node ./dist/index.js",
     "build": "cross-env NODE_ENV=production npx tsc -p ./tsconfig.build.json --outDir ./dist",
     "start:dev": "cross-env NODE_ENV=dev npx nodemon --exec ts-node index.ts",
     "test": "npx nyc -- npx mocha",
