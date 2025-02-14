@@ -1,4 +1,9 @@
-
 export interface IDoLoginResponse {
-    message: string;
+  message: string;
+}
+
+export interface IUserResponse {
+  email: string;
+  firstname: string;
+  lastname: string;
 }

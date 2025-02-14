@@ -9,32 +9,34 @@ import { useStores } from "./stores/RootStore";
 import { observer } from "mobx-react-lite";
 
 const App = observer(() => {
-  const { fetchAppVariables, token } = useStores();
+  const { fetchAppVariables, token, appLoaded } = useStores();
 
   useEffect(() => {
     fetchAppVariables();
   }, []);
 
   return (
-    <div>
-      {/* Routes nest inside one another. Nested route paths build upon
+    appLoaded && (
+      <>
+        {/* Routes nest inside one another. Nested route paths build upon
             parent route paths, and nested route elements render inside
             parent route elements. See the note about <Outlet> below. */}
-      <Routes>
-        <Route path="/" element={token ? <Root /> : <Navigate to={"login"} />}>
-          <Route index element={<Navigate to="my" />} />
-          <Route path="timeline" element={<Timeline />} />
-          <Route path="my" element={<Self />} />
-          {/* <ProtectedRoute path= */}
+        <Routes>
+          <Route path="/" element={token ? <Root /> : <Navigate to={"login"} />}>
+            <Route index element={<Navigate to="my" />} />
+            <Route path="timeline" element={<Timeline />} />
+            <Route path="my" element={<Self />} />
+            {/* <ProtectedRoute path= */}
 
-          {/* Using path="*"" means "match anything", so this route
+            {/* Using path="*"" means "match anything", so this route
                 acts like a catch-all for URLs that we don't have explicit
                 routes for. */}
-          <Route path="*" element={<NoMatch />} />
-        </Route>
-        <Route path="login" element={token ? <Navigate to={"/"} /> : <LoginForm />} />
-      </Routes>
-    </div>
+            <Route path="*" element={<NoMatch />} />
+          </Route>
+          <Route path="login" element={token ? <Navigate to={"/"} /> : <LoginForm />} />
+        </Routes>
+      </>
+    )
   );
 });
 

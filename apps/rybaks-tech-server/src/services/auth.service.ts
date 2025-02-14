@@ -1,12 +1,12 @@
-import { inject, injectable, Types } from '@biorate/inversion';
-import { ForbiddenException, InternalServerErrorException, Logger } from '@nestjs/common';
-import * as argon from 'argon2';
-import { JwtService } from '@nestjs/jwt';
-import { AuthDto } from '../app/http/dto';
-import { User } from '../models';
-import { UniqueConstraintError } from 'sequelize';
-import { IConfig } from '@biorate/config';
-import { BJwtService } from './jwt.service';
+import { inject, injectable, Types } from "@biorate/inversion";
+import { ForbiddenException, InternalServerErrorException, Logger } from "@nestjs/common";
+import * as argon from "argon2";
+import { JwtService } from "@nestjs/jwt";
+import { AuthDto } from "../app/http/dto";
+import { User } from "../models";
+import { UniqueConstraintError } from "sequelize";
+import { IConfig } from "@biorate/config";
+import { BJwtService } from "./jwt.service";
 
 @injectable()
 export class AuthService {
@@ -16,6 +16,8 @@ export class AuthService {
   @inject(Types.BJwtService) private jwt: BJwtService;
 
   public async signin(dto: AuthDto) {
+    this.logger.debug(`(signin) Processing request. ${JSON.stringify(dto)}...`);
+
     try {
       const user = await User.findOne({
         where: {
@@ -30,7 +32,7 @@ export class AuthService {
       const pwMatches = await argon.verify(user.hash, dto.password);
 
       if (!pwMatches) {
-        throw new ForbiddenException('Invalid credentials');
+        throw new ForbiddenException("Invalid credentials");
       }
 
       return this.signToken(user.id, user.email);
@@ -44,6 +46,8 @@ export class AuthService {
   }
 
   public async signup(dto: AuthDto) {
+    this.logger.debug(`(signup) Processing request. ${JSON.stringify(dto)}...`);
+
     const hash = await argon.hash(dto.password);
 
     try {
@@ -56,23 +60,20 @@ export class AuthService {
     } catch (error) {
       this.logger.error(error);
       if (error instanceof UniqueConstraintError) {
-        throw new ForbiddenException('Account taken');
+        throw new ForbiddenException("Account taken");
       }
       throw new InternalServerErrorException();
     }
   }
 
-  public async signToken(
-    userId: number,
-    email: string,
-  ): Promise<{ access_token: string }> {
+  public async signToken(userId: number, email: string): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
       email,
     };
     const token = await this.jwt.signAsync(payload, {
-      expiresIn: '15m',
-      secret: this.config.get('JWT_SECRET'),
+      expiresIn: "15m",
+      secret: this.config.get("JWT_SECRET"),
     });
     return {
       access_token: token,
