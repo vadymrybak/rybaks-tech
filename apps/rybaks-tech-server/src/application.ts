@@ -20,6 +20,7 @@ export class Application implements IApplication<Server> {
   @inject(Types.Config) private config: IConfig;
 
   public app: INestApplication<Server>;
+
   public document: OpenAPIObject;
 
   private readonly logger: Logger = new Logger(Application.name);

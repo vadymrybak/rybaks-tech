@@ -1,12 +1,13 @@
 import { Body, Controller, HttpCode, HttpStatus, Logger, Post, Res } from "@nestjs/common";
+import { inject, Types } from "@biorate/inversion";
 import { Response } from "express";
 import { AuthService } from "../../../services";
-import { inject, Types } from "@biorate/inversion";
 import { AuthDto } from "../dto";
 
 @Controller("auth")
 export class AuthController {
   private readonly logger: Logger = new Logger(AuthController.name);
+
   @inject(Types.AuthService) protected authService: AuthService;
 
   @HttpCode(HttpStatus.CREATED)

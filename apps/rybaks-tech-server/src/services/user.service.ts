@@ -8,7 +8,7 @@ export class UserService {
 
   public async getUser(userid: number) {
     this.logger.debug(`(getUser) Processing request...`);
-    const user = await User.findByPk(userid, {attributes: ["email", "firstname", "lastname"]});
+    const user = await User.findByPk(userid, { attributes: ["email", "firstname", "lastname"] });
     return user;
   }
 }

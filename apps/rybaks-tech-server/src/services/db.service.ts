@@ -5,11 +5,11 @@ import { Images } from "../models";
 
 @injectable()
 export class DbService {
-    private readonly logger: Logger = new Logger(DbService.name);
+  private readonly logger: Logger = new Logger(DbService.name);
 
-    @inject(Types.Config) private config: IConfig;
+  @inject(Types.Config) private config: IConfig;
 
-    public async getStuff(){
-        return Images.findAll(); 
-    }
-} 
+  public async getStuff() {
+    return Images.findAll();
+  }
+}

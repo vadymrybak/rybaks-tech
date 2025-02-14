@@ -1,10 +1,10 @@
-import { Table, Column, Model, DataType, BelongsTo, HasMany } from '@biorate/sequelize';
+import { Table, Column, Model, DataType, BelongsTo, HasMany } from "@biorate/sequelize";
 
 @Table({
-  schema: 'images',
+  schema: "images",
   timestamps: false,
   freezeTableName: true,
-  tableName: 'images',
+  tableName: "images",
 })
 export class Images extends Model {
   @Column({ type: DataType.CHAR, primaryKey: false, allowNull: false })

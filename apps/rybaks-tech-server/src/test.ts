@@ -1,4 +1,4 @@
-import { injectable } from '@biorate/inversion';
+import { injectable } from "@biorate/inversion";
 
 @injectable()
 export class Test {
@@ -7,7 +7,7 @@ export class Test {
   protected dec = 1;
 
   public echo() {
-    return 'hello';
+    return "hello";
   }
 
   protected mutate(object: { inc: number }) {
@@ -17,6 +17,6 @@ export class Test {
   }
 
   protected error() {
-    throw new Error('test-error');
+    throw new Error("test-error");
   }
 }

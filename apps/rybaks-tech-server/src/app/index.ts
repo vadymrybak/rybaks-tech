@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { HttpModule } from './http';
+import { Module } from "@nestjs/common";
+import { HttpModule } from "./http";
 
 @Module({
   imports: [HttpModule],

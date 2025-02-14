@@ -1,5 +1,5 @@
-import { SequelizeConnector } from '@biorate/sequelize';
-import { Images, User } from '../models';
+import { SequelizeConnector } from "@biorate/sequelize";
+import { Images, User } from "../models";
 
 // Assign models with sequelize connector
 export class ServiceApiSequelizeConnector extends SequelizeConnector {

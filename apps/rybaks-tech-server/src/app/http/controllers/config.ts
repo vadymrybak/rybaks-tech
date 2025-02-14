@@ -8,6 +8,7 @@ import { JwtGuard } from "../guards";
 @Controller("api/config")
 export class ConfigController {
   private readonly logger: Logger = new Logger(ConfigController.name);
+
   @inject(Types.Config) protected config: IConfig;
 
   @Get()

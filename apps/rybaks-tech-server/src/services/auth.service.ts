@@ -1,11 +1,10 @@
 import { inject, injectable, Types } from "@biorate/inversion";
 import { ForbiddenException, InternalServerErrorException, Logger } from "@nestjs/common";
 import * as argon from "argon2";
-import { JwtService } from "@nestjs/jwt";
+import { IConfig } from "@biorate/config";
+import { UniqueConstraintError } from "sequelize";
 import { AuthDto } from "../app/http/dto";
 import { User } from "../models";
-import { UniqueConstraintError } from "sequelize";
-import { IConfig } from "@biorate/config";
 import { BJwtService } from "./jwt.service";
 
 @injectable()
@@ -13,6 +12,7 @@ export class AuthService {
   private readonly logger: Logger = new Logger(AuthService.name);
 
   @inject(Types.Config) private config: IConfig;
+
   @inject(Types.BJwtService) private jwt: BJwtService;
 
   public async signin(dto: AuthDto) {
@@ -35,7 +35,7 @@ export class AuthService {
         throw new ForbiddenException("Invalid credentials");
       }
 
-      return this.signToken(user.id, user.email);
+      return await this.signToken(user.id, user.email);
     } catch (error) {
       this.logger.error(error);
       if (error instanceof ForbiddenException) {
@@ -56,7 +56,7 @@ export class AuthService {
         hash,
       });
 
-      return this.signToken(user.id, user.email);
+      return await this.signToken(user.id, user.email);
     } catch (error) {
       this.logger.error(error);
       if (error instanceof UniqueConstraintError) {

@@ -1,10 +1,10 @@
-import { Table, Column, Model, DataType, BelongsTo, HasMany } from '@biorate/sequelize';
+import { Table, Column, Model, DataType, BelongsTo, HasMany } from "@biorate/sequelize";
 
 @Table({
-  schema: 'users',
+  schema: "users",
   timestamps: false,
   freezeTableName: true,
-  tableName: 'users',
+  tableName: "users",
 })
 export class User extends Model {
   @Column({ type: DataType.INTEGER, primaryKey: true, autoIncrementIdentity: true, autoIncrement: true })
@@ -19,7 +19,7 @@ export class User extends Model {
   @Column({ type: DataType.CHAR, allowNull: false })
   email: string;
 
-  @Column({ type: DataType.CHAR, allowNull: false,  })
+  @Column({ type: DataType.CHAR, allowNull: false })
   hash: string;
 
   @Column({ type: DataType.CHAR, allowNull: true })
