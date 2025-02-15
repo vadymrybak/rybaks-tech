@@ -1,7 +1,7 @@
 import { injectable } from "@biorate/inversion";
 import { Logger } from "@nestjs/common";
 import * as sharp from "sharp";
-import { Game, User, UserGame } from "../models";
+import { Game, Screenshot, ScreenshotGameUser, User, UserGame } from "../models";
 
 @injectable()
 export class UIService {
@@ -22,6 +22,8 @@ export class UIService {
   }
 
   public async uploadFiles(files: Express.Multer.File[]) {
+    this.logger.debug(`(uploadFiles) Processing request. files: ${files.length}`);
+
     const b64: string[] = [];
     for (let index = 0; index < files.length; index++) {
       let base64Image = files[index].buffer;
@@ -30,5 +32,21 @@ export class UIService {
     }
 
     return b64;
+  }
+
+  public async getUserScreenshots(userid: number) {
+    this.logger.debug(`(getUserScreenshots) Processing request. userid: ${userid}`);
+    const screenshots = await Screenshot.findAll({
+      include: [{ model: ScreenshotGameUser, where: { userid } }],
+      // include: [{ model: ScreenshotGameUser, where: { userid }, include: [{ model: User }, { model: Game }] }],
+    });
+    return screenshots.map((s) => ({
+      id: s.id,
+      base64: s.base64,
+      name: s.name,
+      description: s.description,
+      updatedat: s.updatedat,
+      createdat: s.createdat,
+    }));
   }
 }

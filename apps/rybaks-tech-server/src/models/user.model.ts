@@ -1,5 +1,6 @@
 import { Table, Column, Model, DataType, BelongsTo, HasMany } from "@biorate/sequelize";
 import { UserGame } from "./userGame.model";
+import { ScreenshotGameUser } from "./screenshotGameUser.model";
 
 @Table({
   schema: "users",

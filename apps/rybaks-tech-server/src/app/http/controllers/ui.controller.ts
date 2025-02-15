@@ -48,6 +48,13 @@ export class UIController {
     return this.uiService.getUserGames(id);
   }
 
+  @Get("user/:id/screenshots")
+  public getUserScreenshots(@Param("id", new ParseIntPipe()) id: number) {
+    this.logger.debug(`(getUserScreenshots) Incoming request. id: ${id}`);
+
+    return this.uiService.getUserScreenshots(id);
+  }
+
   @Post("upload")
   @UseInterceptors(FilesInterceptor("files"))
   public uploadFile(@UploadedFiles() files: Array<Express.Multer.File>) {

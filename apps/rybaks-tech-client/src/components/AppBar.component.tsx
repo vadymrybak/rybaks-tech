@@ -41,7 +41,7 @@ const AppHeader = observer(() => {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: "flex", md: "flex" }, mr: 1 }} />
+          <AdbIcon sx={{ display: { xs: "flex", md: "flex", lg: "flex", xl: "flex" }, mr: 1 }} />
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "flex" } }}>
             {pages.map((page) => (
