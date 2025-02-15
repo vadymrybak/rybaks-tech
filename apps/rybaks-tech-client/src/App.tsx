@@ -7,35 +7,34 @@ import { LoginForm } from "./pages/Login/Login.page";
 import { useEffect } from "react";
 import { useStores } from "./stores/RootStore";
 import { observer } from "mobx-react-lite";
+import { getCookieByName } from "./utils/utils";
 
 const App = observer(() => {
-  const { fetchAppVariables, token, appLoaded } = useStores();
+  const { checkToken, tokenOK, appLoaded, setAppLoaded } = useStores();
 
   useEffect(() => {
-    fetchAppVariables();
+    const token = getCookieByName("access_token");
+
+    console.info(`App started. Some token: ${!!token}`);
+
+    if (token) {
+      checkToken(token);
+    } else {
+      setAppLoaded(true);
+    }
   }, []);
 
   return (
     appLoaded && (
-      <>
-        {/* Routes nest inside one another. Nested route paths build upon
-            parent route paths, and nested route elements render inside
-            parent route elements. See the note about <Outlet> below. */}
-        <Routes>
-          <Route path="/" element={token ? <Root /> : <Navigate to={"login"} />}>
-            <Route index element={<Navigate to="my" />} />
-            <Route path="timeline" element={<Timeline />} />
-            <Route path="my" element={<Self />} />
-            {/* <ProtectedRoute path= */}
-
-            {/* Using path="*"" means "match anything", so this route
-                acts like a catch-all for URLs that we don't have explicit
-                routes for. */}
-            <Route path="*" element={<NoMatch />} />
-          </Route>
-          <Route path="login" element={token ? <Navigate to={"/"} /> : <LoginForm />} />
-        </Routes>
-      </>
+      <Routes>
+        <Route path="/" element={tokenOK ? <Root /> : <Navigate to={"login"} />}>
+          <Route index element={<Navigate to="my" />} />
+          <Route path="timeline" element={<Timeline />} />
+          <Route path="my" element={<Self />} />
+          <Route path="*" element={<NoMatch />} />
+        </Route>
+        <Route path="login" element={tokenOK ? <Navigate to={"/"} /> : <LoginForm />} />
+      </Routes>
     )
   );
 });

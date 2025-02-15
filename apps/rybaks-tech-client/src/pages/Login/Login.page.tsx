@@ -11,15 +11,8 @@ export const LoginForm = observer(() => {
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
-    // Implement your login logic here
-    console.log("Username:", username);
-    console.log("Password:", password);
 
     doLogin(username, password);
-
-    // Reset form fields
-    // setUsername("");
-    // setPassword("");
   };
 
   return (

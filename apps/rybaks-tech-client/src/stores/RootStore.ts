@@ -1,31 +1,82 @@
 import React from "react";
-import { makeObservable, observable, runInAction } from "mobx";
+import { action, makeObservable, observable, runInAction } from "mobx";
 import { VariablesResponse } from "../types/variablesResponse";
 import { ApiService } from "../api/appUtilsService";
 import { getCookieByName } from "../utils/utils";
-import { IUserResponse } from "../types/apiService.interfaces";
+import { IUser } from "../types/apiService.interfaces";
+import SelfPageStore from "./SelfPageStore";
 
 export class RootStore {
-  appVariables: VariablesResponse | null = null;
   appLoaded: boolean = false;
+  viewLoaded: boolean = false;
+  appVariables: VariablesResponse | null = null;
   isLoggingIn: boolean = false;
   token: string | null = null;
-  user: IUserResponse | null = null;
+  tokenOK: boolean = false;
+  user: IUser | null = null;
+
+  selfPageStore: SelfPageStore;
 
   constructor() {
+    this.selfPageStore = new SelfPageStore(this);
+
     this.token = getCookieByName("access_token");
     ApiService.token = this.token;
     makeObservable(this, {
       appLoaded: observable,
+      viewLoaded: observable,
       appVariables: observable,
       token: observable,
       isLoggingIn: observable,
       user: observable,
+      tokenOK: observable,
+      checkToken: action.bound,
+      loadApp: action.bound,
     });
-    this.appLoaded = false;
   }
 
-  public fetchAppVariables = () => {
+  checkToken(token: string) {
+    console.log("Check token");
+
+    ApiService.token = token;
+    this.appLoaded = false;
+    ApiService.checkToken().subscribe({
+      next: () => {
+        runInAction(() => {
+          this.tokenOK = true;
+          this.appLoaded = true;
+          this.token = getCookieByName("access_token");
+        });
+      },
+      error: (error: unknown) => {
+        console.error("Error while getting app variables!", error);
+        runInAction(() => {
+          this.tokenOK = false;
+          this.appLoaded = true;
+        });
+      },
+    });
+  }
+
+  loadApp() {
+    console.info("Load app");
+    this.viewLoaded = false;
+
+    ApiService.getUser().subscribe({
+      next: (data: IUser) => {
+        runInAction(() => {
+          this.user = data;
+          this.viewLoaded = true;
+        });
+      },
+      error: (error) => {
+        console.log(error);
+        this.viewLoaded = false;
+      },
+    });
+  }
+
+  public getVariables = () => {
     this.appLoaded = false;
 
     ApiService.getVariables().subscribe({
@@ -33,7 +84,6 @@ export class RootStore {
         runInAction(() => {
           this.appVariables = variables;
           this.getUser();
-          this.appLoaded = true;
         });
       },
       error: (error: unknown) => {
@@ -46,6 +96,20 @@ export class RootStore {
     });
   };
 
+  public getUser = () => {
+    ApiService.getUser().subscribe({
+      next: (data: IUser) => {
+        runInAction(() => {
+          this.user = data;
+          this.appLoaded = true;
+        });
+      },
+      error: (error) => {
+        console.log(error);
+      },
+    });
+  };
+
   public doLogin = (username: string, password: string) => {
     this.isLoggingIn = true;
 
@@ -53,8 +117,9 @@ export class RootStore {
       next: () => {
         runInAction(() => {
           this.token = getCookieByName("access_token");
+          this.tokenOK = true;
+          this.isLoggingIn = false;
           ApiService.token = this.token;
-          this.fetchAppVariables();
         });
       },
       error: (error) => {
@@ -64,17 +129,8 @@ export class RootStore {
     });
   };
 
-  public getUser = () => {
-    ApiService.getUser().subscribe({
-      next: (data: IUserResponse) => {
-        runInAction(() => {
-          this.user = data;
-        });
-      },
-      error: (error) => {
-        console.log(error);
-      },
-    });
+  public setAppLoaded = (value: boolean) => {
+    this.appLoaded = value;
   };
 }
 

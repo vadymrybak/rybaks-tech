@@ -17,6 +17,13 @@ export class UIController {
 
   @inject(Types.Config) protected config: IConfig;
 
+  @Get("check-token")
+  protected checkToken() {
+    this.logger.debug(`(checkToken) Incoming request`);
+
+    return "OK";
+  }
+
   @Get("config")
   @ApiOperation({ summary: "Get client config" })
   protected getConfig() {
