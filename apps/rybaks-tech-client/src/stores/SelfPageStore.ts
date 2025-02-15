@@ -18,7 +18,10 @@ class SelfPageStore {
 
     makeObservable(this, {
       gamesLoaded: observable,
+      activeGameTab: observable,
       getUserGames: action.bound,
+      handleTabChange: action.bound,
+      uploadScreenshots: action.bound,
     });
   }
 
@@ -40,6 +43,26 @@ class SelfPageStore {
       });
     } else {
       throw new Error("User is undefined");
+    }
+  }
+
+  uploadScreenshots(files: FileList) {
+    ApiService.uploadScreenshots(files).subscribe({
+      next: (data: any) => {
+        runInAction(() => {
+          console.log(data);
+        });
+      },
+      error: (error) => {
+        console.log(error);
+      },
+    });
+  }
+
+  handleTabChange(value: number) {
+    const tab = this.userGames.find((el) => el.id === value);
+    if (tab) {
+      this.activeGameTab = tab.id;
     }
   }
 }

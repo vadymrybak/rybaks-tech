@@ -8,7 +8,6 @@ import * as controllers from "./controllers";
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      serveRoot: "/",
       rootPath: path.create(process.cwd(), "../rybaks-tech-client/dist"),
     }),
   ],

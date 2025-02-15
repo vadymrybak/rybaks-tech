@@ -28,13 +28,6 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-function a11yProps(index: number) {
-  return {
-    id: `vertical-tab-${index}`,
-    "aria-controls": `vertical-tabpanel-${index}`,
-  };
-}
-
 const UserGames = observer(() => {
   const { selfPageStore } = useStores();
 
@@ -43,22 +36,15 @@ const UserGames = observer(() => {
   }, []);
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
-    console.log("handleChange", newValue);
+    selfPageStore.handleTabChange(newValue);
   };
 
   return (
     selfPageStore.gamesLoaded && (
       <>
-        <Tabs
-          orientation="vertical"
-          variant="scrollable"
-          value={selfPageStore.activeGameTab}
-          onChange={handleChange}
-          aria-label="Vertical tabs example"
-          sx={{ borderRight: 1, borderColor: "divider" }}
-        >
+        <Tabs orientation="vertical" variant="scrollable" value={selfPageStore.activeGameTab} onChange={handleChange} sx={{ borderRight: 1, borderColor: "divider" }}>
           {selfPageStore.userGames.map((game: IUserGame) => {
-            return <Tab key={game.id} label={game.name} {...a11yProps(game.id)} />;
+            return <Tab key={game.id} label={game.name} value={game.id} id={game.id.toString()} />;
           })}
         </Tabs>
         {selfPageStore.userGames.map((game: IUserGame) => {

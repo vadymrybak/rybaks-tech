@@ -1,8 +1,9 @@
 import { IConfig } from "@biorate/config";
+import { FilesInterceptor } from "@nestjs/platform-express";
 import { inject, Types } from "@biorate/inversion";
-import { Controller, Get, Logger, Param, ParseIntPipe, UseGuards } from "@nestjs/common";
 import { ApiOperation } from "@nestjs/swagger";
-import { AuthService, UserService } from "../../../services";
+import { Controller, Get, Logger, Param, ParseIntPipe, Post, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { UIService } from "../../../services";
 import { UserDecorator } from "../decorators";
 import { JwtGuard } from "../guards";
 
@@ -11,11 +12,9 @@ import { JwtGuard } from "../guards";
 export class UIController {
   private readonly logger: Logger = new Logger(UIController.name);
 
-  @inject(Types.AuthService) protected authService: AuthService;
-
-  @inject(Types.UserService) protected userService: UserService;
-
   @inject(Types.Config) protected config: IConfig;
+
+  @inject(Types.UIService) protected uiService: UIService;
 
   @Get("check-token")
   protected checkToken() {
@@ -39,11 +38,21 @@ export class UIController {
   public getUser(@UserDecorator("sub") sub: number) {
     this.logger.debug(`(getUser) Incoming request`);
 
-    return this.userService.getUser(sub);
+    return this.uiService.getUser(sub);
   }
 
   @Get("user/:id/games")
   public getUserGames(@Param("id", new ParseIntPipe()) id: number) {
-    return this.userService.getUserGames(id);
+    this.logger.debug(`(getUserGames) Incoming request. id: ${id}`);
+
+    return this.uiService.getUserGames(id);
+  }
+
+  @Post("upload")
+  @UseInterceptors(FilesInterceptor("files"))
+  public uploadFile(@UploadedFiles() files: Array<Express.Multer.File>) {
+    this.logger.debug(`(uploadFile) Incoming request. files: ${files.length}`);
+
+    return this.uiService.uploadFiles(files);
   }
 }

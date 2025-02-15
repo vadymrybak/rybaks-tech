@@ -11,7 +11,7 @@ import { ServiceApiSequelizeConnector } from "./connectors/SequelizeConnector";
 import { Application } from "./application";
 import { IApplication } from "./interfaces";
 import { Test } from "./test";
-import { AuthService, BJwtService, DbService, JwtStrategy, UserService } from "./services";
+import { AuthService, BJwtService, JwtStrategy, UIService } from "./services";
 
 export class Root extends Core() {
   @inject(Types.Config) public readonly config: IConfig;
@@ -49,8 +49,7 @@ container.bind<IApplication>(Types.Application).to(Application).inSingletonScope
 container.bind<Test>(Types.Test).to(Test).inSingletonScope();
 container.bind<Root>(Root).toSelf().inSingletonScope();
 container.bind<ISequelizeConnector>(Types.ServiceApiSequelizeConnector).to(ServiceApiSequelizeConnector).inSingletonScope();
-container.bind<DbService>(Types.DbService).to(DbService).inSingletonScope();
 container.bind<AuthService>(Types.AuthService).to(AuthService).inSingletonScope();
 container.bind<BJwtService>(Types.BJwtService).to(BJwtService).inSingletonScope();
 container.bind<JwtStrategy>(Types.JwtStrategy).to(JwtStrategy).inSingletonScope();
-container.bind<UserService>(Types.UserService).to(UserService).inSingletonScope();
+container.bind<UIService>(Types.UIService).to(UIService).inSingletonScope();

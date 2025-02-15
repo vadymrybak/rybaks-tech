@@ -35,6 +35,27 @@ export class ApiService {
     );
   }
 
+  public static uploadScreenshots(files: FileList): Observable<any> {
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append("files", files[i]); // Use 'files' as this matches the controller's expected field name
+    }
+    return LeroyAjax(
+      "/api/upload",
+      {},
+      "json",
+      "POST",
+      {
+        Authorization: `Bearer ${ApiService.token}`,
+        // "Content-Type": "multipart/form-data",
+      },
+      formData,
+    ).pipe(
+      map((data) => data.response),
+      retry(apiRetryTimes),
+    );
+  }
+
   public static getUserGames(id: number): Observable<IUserGame[]> {
     return LeroyAjax(`/api/user/${id}/games`, {}, "json", "GET", {
       Authorization: `Bearer ${ApiService.token}`,
