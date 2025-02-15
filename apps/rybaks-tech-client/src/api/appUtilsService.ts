@@ -18,7 +18,7 @@ export class ApiService {
   }
 
   public static getUser(): Observable<IUserResponse> {
-    return LeroyAjax("/user", {}, "json", "GET", {
+    return LeroyAjax("/api/user", {}, "json", "GET", {
       Authorization: `Bearer ${ApiService.token}`,
     }).pipe(
       map((data) => data.response),

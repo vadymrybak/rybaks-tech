@@ -31,7 +31,6 @@ export class RootStore {
     ApiService.getVariables().subscribe({
       next: (variables: VariablesResponse) => {
         runInAction(() => {
-          // this.token = getCookieByName("access_token");
           this.appVariables = variables;
           this.getUser();
           this.appLoaded = true;
@@ -55,7 +54,7 @@ export class RootStore {
         runInAction(() => {
           this.token = getCookieByName("access_token");
           ApiService.token = this.token;
-          this.getUser();
+          this.fetchAppVariables();
         });
       },
       error: (error) => {
@@ -70,12 +69,10 @@ export class RootStore {
       next: (data: IUserResponse) => {
         runInAction(() => {
           this.user = data;
-          this.appLoaded = true;
         });
       },
       error: (error) => {
         console.log(error);
-        this.isLoggingIn = false;
       },
     });
   };

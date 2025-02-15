@@ -1,4 +1,6 @@
 import { Table, Column, Model, DataType, BelongsTo, HasMany } from "@biorate/sequelize";
+import { User } from "./user.model";
+import { Game } from "./game.model";
 
 @Table({
   schema: "user_games",
@@ -6,7 +8,7 @@ import { Table, Column, Model, DataType, BelongsTo, HasMany } from "@biorate/seq
   freezeTableName: true,
   tableName: "user_games",
 })
-export class Game extends Model {
+export class UserGame extends Model {
   @Column({ type: DataType.INTEGER, primaryKey: true, autoIncrementIdentity: true, autoIncrement: true })
   id: number;
 
@@ -15,4 +17,10 @@ export class Game extends Model {
 
   @Column({ type: DataType.INTEGER })
   gameid: number;
+
+  @BelongsTo(() => User, { foreignKey: "userid", targetKey: "id" })
+  user: User;
+
+  @BelongsTo(() => Game, { foreignKey: "gameid", targetKey: "id" })
+  game: Game;
 }

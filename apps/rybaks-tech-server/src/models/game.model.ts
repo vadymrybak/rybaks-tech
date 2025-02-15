@@ -1,4 +1,6 @@
 import { Table, Column, Model, DataType, BelongsTo, HasMany } from "@biorate/sequelize";
+import { User } from "./user.model";
+import { UserGame } from "./userGame.model";
 
 @Table({
   schema: "user_games",
@@ -18,4 +20,7 @@ export class Game extends Model {
 
   @Column({ type: DataType.TIME, allowNull: true })
   updatedat: Date;
+
+  @HasMany(() => UserGame, { foreignKey: "userid", sourceKey: "id" })
+  users: UserGame[];
 }
