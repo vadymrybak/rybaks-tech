@@ -13,3 +13,18 @@ export interface IUserGame {
   id: number;
   name: string;
 }
+
+export interface IScreenshotResponse {
+  screenshots: IScreenshot[];
+  total: number;
+}
+
+export interface IScreenshot {
+  id: number;
+  base64: string;
+  name: string;
+  description: string;
+  updatedat: string;
+  createdat: string;
+  filename: string;
+}

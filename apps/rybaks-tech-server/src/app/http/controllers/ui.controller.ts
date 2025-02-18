@@ -42,9 +42,10 @@ export class UIController {
   }
 
   @Get("user/:id/games")
-  public getUserGames(@Param("id", new ParseIntPipe()) id: number) {
+  public async getUserGames(@Param("id", new ParseIntPipe()) id: number) {
     this.logger.debug(`(getUserGames) Incoming request. id: ${id}`);
 
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
     return this.uiService.getUserGames(id);
   }
 
@@ -55,11 +56,22 @@ export class UIController {
     return this.uiService.getUserScreenshots(id);
   }
 
-  @Post("upload")
+  @Get("user/:userid/game/:gameid/screenshots")
+  public getUserGameScreenshots(@Param("userid", new ParseIntPipe()) userid: number, @Param("gameid", new ParseIntPipe()) gameid: number) {
+    this.logger.debug(`(getUserGameScreenshots) Incoming request. id: ${userid}, gameid: ${gameid}`);
+
+    return this.uiService.getUserGameScreenshots(userid, gameid);
+  }
+
+  @Post("user/:userid/game/:gameid/screenshots/upload")
   @UseInterceptors(FilesInterceptor("files"))
-  public uploadFile(@UploadedFiles() files: Array<Express.Multer.File>) {
+  public uploadFile(
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Param("userid", new ParseIntPipe()) userid: number,
+    @Param("gameid", new ParseIntPipe()) gameid: number,
+  ) {
     this.logger.debug(`(uploadFile) Incoming request. files: ${files.length}`);
 
-    return this.uiService.uploadFiles(files);
+    return this.uiService.uploadFiles(files, gameid, userid);
   }
 }

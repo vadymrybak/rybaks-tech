@@ -19,6 +19,9 @@ export class Screenshot extends Model {
   name: string;
 
   @Column({ type: DataType.CHAR, allowNull: true })
+  filename: string;
+
+  @Column({ type: DataType.CHAR, allowNull: true })
   description: string;
 
   @Column({ type: DataType.TIME, allowNull: true })

@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useStores } from "./stores/RootStore";
 import { observer } from "mobx-react-lite";
 import { getCookieByName } from "./utils/utils";
+import { Logger } from "./utils/logger";
 
 const App = observer(() => {
   const { checkToken, tokenOK, appLoaded, setAppLoaded } = useStores();
@@ -15,7 +16,7 @@ const App = observer(() => {
   useEffect(() => {
     const token = getCookieByName("access_token");
 
-    console.info(`App started. Some token: ${!!token}`);
+    Logger.info(`App started. Some token exists: ${!!token}`);
 
     if (token) {
       checkToken(token);

@@ -5,6 +5,7 @@ import { ApiService } from "../api/appUtilsService";
 import { getCookieByName } from "../utils/utils";
 import { IUser } from "../types/apiService.interfaces";
 import SelfPageStore from "./SelfPageStore";
+import { Logger } from "../utils/logger";
 
 export class RootStore {
   appLoaded: boolean = false;
@@ -32,12 +33,14 @@ export class RootStore {
       tokenOK: observable,
       checkToken: action.bound,
       loadApp: action.bound,
+      doLogin: action.bound,
+      getVariables: action.bound,
+      getUser: action.bound,
+      setAppLoaded: action.bound,
     });
   }
 
   checkToken(token: string) {
-    console.log("Check token");
-
     ApiService.token = token;
     this.appLoaded = false;
     ApiService.checkToken().subscribe({
@@ -59,7 +62,8 @@ export class RootStore {
   }
 
   loadApp() {
-    console.info("Load app");
+    Logger.debug("RootStore - Load app");
+    
     this.viewLoaded = false;
 
     ApiService.getUser().subscribe({
@@ -76,7 +80,7 @@ export class RootStore {
     });
   }
 
-  public getVariables = () => {
+  getVariables() {
     this.appLoaded = false;
 
     ApiService.getVariables().subscribe({
@@ -94,9 +98,9 @@ export class RootStore {
         });
       },
     });
-  };
+  }
 
-  public getUser = () => {
+  getUser() {
     ApiService.getUser().subscribe({
       next: (data: IUser) => {
         runInAction(() => {
@@ -108,9 +112,9 @@ export class RootStore {
         console.log(error);
       },
     });
-  };
+  }
 
-  public doLogin = (username: string, password: string) => {
+  doLogin(username: string, password: string) {
     this.isLoggingIn = true;
 
     ApiService.doLogin(username, password).subscribe({
@@ -127,11 +131,11 @@ export class RootStore {
         this.isLoggingIn = false;
       },
     });
-  };
+  }
 
-  public setAppLoaded = (value: boolean) => {
+  setAppLoaded(value: boolean) {
     this.appLoaded = value;
-  };
+  }
 }
 
 export const rootStore = new RootStore();

@@ -7,10 +7,10 @@ echo $DEPLOY_VERSION
 
 kubectl config get-contexts
 
-# kubectl apply -f deploy.yaml
 
 docker build --platform linux/amd64 -t rybaks.cr.cloud.ru/rybaks-tech:$1  . && \
-docker push rybaks.cr.cloud.ru/rybaks-tech:$1
+docker push rybaks.cr.cloud.ru/rybaks-tech:$1 && \
+envsubst < deploy.yaml | kubectl apply -f -
 
 echo "Job done for version:"
 echo $DEPLOY_VERSION

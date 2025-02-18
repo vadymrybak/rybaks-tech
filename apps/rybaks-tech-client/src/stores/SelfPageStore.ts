@@ -1,7 +1,9 @@
 import { action, makeObservable, observable, runInAction } from "mobx";
+import { concatMap } from "rxjs/operators";
 import { RootStore } from "./RootStore";
 import { ApiService } from "../api/appUtilsService";
-import { IUserGame } from "../types/apiService.interfaces";
+import { IScreenshot, IScreenshotResponse, IUserGame } from "../types/apiService.interfaces";
+import { Logger } from "../utils/logger";
 
 class SelfPageStore {
   /**
@@ -11,6 +13,7 @@ class SelfPageStore {
 
   gamesLoaded: boolean = false;
   userGames: IUserGame[] = [];
+  loadedScreenshots: IScreenshot[] = [];
   activeGameTab: number = 0;
 
   constructor(rootStore: RootStore) {
@@ -19,21 +22,71 @@ class SelfPageStore {
     makeObservable(this, {
       gamesLoaded: observable,
       activeGameTab: observable,
-      getUserGames: action.bound,
+      userGames: observable,
       handleTabChange: action.bound,
       uploadScreenshots: action.bound,
+      loadView: action.bound,
     });
   }
 
-  getUserGames() {
+  loadView() {
     this.gamesLoaded = false;
     if (this.rootStore.user) {
-      ApiService.getUserGames(this.rootStore.user.id).subscribe({
-        next: (data: IUserGame[]) => {
+      ApiService.getUserGames(this.rootStore.user.id)
+        .pipe(
+          concatMap((games: IUserGame[]) => {
+            runInAction(() => {
+              this.userGames = games;
+              this.activeGameTab = this.userGames[0].id;
+            });
+            if (this.rootStore.user) {
+              return ApiService.getGameScreenshots(this.rootStore.user.id, games[0].id);
+            }
+            throw new Error("Could not game game list");
+          }),
+        )
+        .subscribe({
+          next: (fetchedScreenshots: IScreenshotResponse) => {
+            runInAction(() => {
+              this.gamesLoaded = true;
+              this.loadedScreenshots = fetchedScreenshots.screenshots;
+            });
+          },
+          error: (error) => {
+            console.log(error);
+            this.gamesLoaded = false;
+          },
+        });
+    } else {
+      throw new Error("User is undefined");
+    }
+  }
+
+  uploadScreenshots(files: FileList) {
+    Logger.debug(`uploadScreenshots - Uploading ${files.length} for gameid ${this.activeGameTab}`);
+
+    if (this.rootStore.user) {
+      ApiService.uploadScreenshots(files, this.rootStore.user.id, this.activeGameTab).subscribe({
+        next: (data: any) => {
           runInAction(() => {
-            this.userGames = data;
+            console.log(data);
+          });
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+    }
+  }
+
+  handleTabChange(gameId: number) {
+    if (this.rootStore.user) {
+      ApiService.getGameScreenshots(this.rootStore.user.id, gameId).subscribe({
+        next: (fetchedScreenshots: IScreenshotResponse) => {
+          runInAction(() => {
             this.gamesLoaded = true;
-            this.activeGameTab = this.userGames[0].id;
+            this.activeGameTab = gameId;
+            this.loadedScreenshots = fetchedScreenshots.screenshots;
           });
         },
         error: (error) => {
@@ -41,28 +94,6 @@ class SelfPageStore {
           this.gamesLoaded = false;
         },
       });
-    } else {
-      throw new Error("User is undefined");
-    }
-  }
-
-  uploadScreenshots(files: FileList) {
-    ApiService.uploadScreenshots(files).subscribe({
-      next: (data: any) => {
-        runInAction(() => {
-          console.log(data);
-        });
-      },
-      error: (error) => {
-        console.log(error);
-      },
-    });
-  }
-
-  handleTabChange(value: number) {
-    const tab = this.userGames.find((el) => el.id === value);
-    if (tab) {
-      this.activeGameTab = tab.id;
     }
   }
 }
