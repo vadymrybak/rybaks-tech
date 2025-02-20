@@ -1,31 +1,14 @@
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import { Box, CircularProgress } from "@mui/material";
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 import { useEffect } from "react";
-import * as React from "react";
-import { useStores } from "../../stores/RootStore";
 import { observer } from "mobx-react-lite";
+import { useStores } from "../../stores/RootStore";
 import { IUserGame } from "../../types/apiService.interfaces";
 import ScreenshotList from "../ScreenshotList";
-
-import "./UserGames.styles.scss";
 import { Loader } from "../Loader/Loader";
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
+import "./UserGames.styles.scss";
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`vertical-tabpanel-${index}`} aria-labelledby={`vertical-tab-${index}`} {...other}>
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+const drawerWidth = 200;
 
 const UserGames = observer(() => {
   const { selfPageStore } = useStores();
@@ -34,41 +17,46 @@ const UserGames = observer(() => {
     selfPageStore.loadView();
   }, []);
 
-  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
-    selfPageStore.handleTabChange(newValue);
-  };
-
   return (
-    <div className="UserGames">
+    <Box className="UserGames">
       {selfPageStore.gamesLoaded ? (
         <>
-          <Tabs
-            orientation="vertical"
-            variant="scrollable"
-            value={selfPageStore.activeGameTab}
-            onChange={handleChange}
-            sx={{ borderRight: 1, borderColor: "divider" }}
+          <Drawer
+            className="drawer"
+            sx={{
+              width: drawerWidth,
+              flexShrink: 0,
+              "& .MuiDrawer-paper": {
+                width: drawerWidth,
+                boxSizing: "border-box",
+              },
+            }}
+            variant="permanent"
+            anchor="left"
           >
-            {selfPageStore.userGames.map((game: IUserGame) => {
-              return <Tab key={game.id} label={game.name} value={game.id} id={game.id.toString()} />;
-            })}
-          </Tabs>
-          {selfPageStore.screenshotsLoaded ? (
-            selfPageStore.userGames.map((game: IUserGame) => {
-              return (
-                <TabPanel key={game.id} value={selfPageStore.activeGameTab} index={game.id}>
-                  <ScreenshotList />
-                </TabPanel>
-              );
-            })
-          ) : (
-            <Loader />
-          )}
+            <List>
+              {selfPageStore.userGames.map((game: IUserGame) => (
+                <ListItem key={game.id} disablePadding>
+                  <ListItemButton
+                    selected={selfPageStore.activeGameTab === game.id}
+                    onClick={() => {
+                      selfPageStore.handleTabChange(game.id);
+                    }}
+                  >
+                    <ListItemText sx={{ textAlign: "center" }} primary={game.name} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Drawer>
+          <Box component="main" sx={{ flexGrow: 1, bgcolor: "background.default", p: 0 }}>
+            {selfPageStore.screenshotsLoaded ? <ScreenshotList /> : <Loader />}
+          </Box>
         </>
       ) : (
         <Loader />
       )}
-    </div>
+    </Box>
   );
 });
 
