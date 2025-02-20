@@ -33,7 +33,7 @@ const ScreenshotList = observer(() => {
       >
         {Object.entries(selfPageStore.loadedScreenshots).map(([day, screenshots]) => {
           return (
-            <TimelineItem>
+            <TimelineItem key={day}>
               <TimelineOppositeContent color="textSecondary">{day}</TimelineOppositeContent>
               <TimelineSeparator>
                 <TimelineDot />

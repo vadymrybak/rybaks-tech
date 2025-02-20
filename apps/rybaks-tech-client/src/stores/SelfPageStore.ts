@@ -13,6 +13,7 @@ class SelfPageStore {
 
   gamesLoaded: boolean = false;
   screenshotsLoaded: boolean = false;
+  createGameModalOpen: boolean = false;
   userGames: IUserGame[] = [];
   loadedScreenshots: IScreenshotByDay = {};
   activeGameTab: number = 0;
@@ -23,12 +24,18 @@ class SelfPageStore {
     makeObservable(this, {
       gamesLoaded: observable,
       screenshotsLoaded: observable,
+      createGameModalOpen: observable,
       activeGameTab: observable,
       userGames: observable,
       handleTabChange: action.bound,
       uploadScreenshots: action.bound,
       loadView: action.bound,
+      toggleCreateGameModalOpen: action.bound,
     });
+  }
+
+  toggleCreateGameModalOpen(value: boolean) {
+    this.createGameModalOpen = value;
   }
 
   loadView() {

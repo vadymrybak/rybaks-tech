@@ -21,6 +21,9 @@ export default function SpeedDialComponent() {
         fileInputRef.current.click();
       }
     }
+    else if (action === "addGame"){
+      selfPageStore.toggleCreateGameModalOpen(true);
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
