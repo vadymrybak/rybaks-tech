@@ -25,7 +25,7 @@ export class UIService {
   public async getUserGames(userid: number) {
     this.logger.debug(`(getUserGames) Processing request. userid: ${userid}`);
     const user = await User.findByPk(userid, {
-      include: [{ model: UserGame, include: [{ model: Game, attributes: ["id", "name"] }] }],
+      include: [{ model: UserGame, include: [{ model: Game, attributes: ["id", "name", "icon"] }] }],
     });
     return user.games.map((game) => game.game);
   }

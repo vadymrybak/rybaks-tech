@@ -15,6 +15,9 @@ export class Game extends Model {
   @Column({ type: DataType.CHAR, allowNull: false })
   name: string;
 
+  @Column({ type: DataType.CHAR, allowNull: false })
+  icon: string;
+
   @Column({ type: DataType.TIME, allowNull: true })
   createdat: Date;
 

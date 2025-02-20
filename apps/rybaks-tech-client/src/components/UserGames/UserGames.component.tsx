@@ -1,4 +1,4 @@
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+import { Avatar, Box, Drawer, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStores } from "../../stores/RootStore";
@@ -43,7 +43,16 @@ const UserGames = observer(() => {
                       selfPageStore.handleTabChange(game.id);
                     }}
                   >
-                    <ListItemText sx={{ textAlign: "center" }} primary={game.name} />
+                    <ListItemText
+                      sx={{ display: "flex", justifyContent: "center" }}
+                      primary={
+                        game.icon ? (
+                          <Avatar className="imageIcon" sx={{ width: 56, height: 56 }} alt={game.name} variant="rounded" src={`data:image/jpeg;base64,${game.icon}`} />
+                        ) : (
+                          game.name
+                        )
+                      }
+                    />
                   </ListItemButton>
                 </ListItem>
               ))}

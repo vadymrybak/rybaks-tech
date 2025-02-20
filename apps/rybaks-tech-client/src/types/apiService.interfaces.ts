@@ -12,6 +12,7 @@ export interface IUser {
 export interface IUserGame {
   id: number;
   name: string;
+  icon: string;
 }
 
 export interface IScreenshotResponse {
