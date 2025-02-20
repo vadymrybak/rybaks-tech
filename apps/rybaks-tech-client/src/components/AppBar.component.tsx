@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useStores } from "../stores/RootStore";
+import { Logger } from "../utils/logger";
 
 const darkTheme = createTheme({
   palette: {
@@ -25,8 +26,8 @@ const darkTheme = createTheme({
   },
 });
 
-const pages = ["timeline", "my"];
-const settings = ["Profile", "Account", "Logout"];
+const pages = ["feed", "my"];
+const settings = ["Profile", "Logout"];
 
 const AppHeader = observer(() => {
   const [, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -43,14 +44,15 @@ const AppHeader = observer(() => {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
+  const handleCloseUserMenu = (setting: any) => () => {
+    Logger.debug(`Menu clicked:  ${setting}`);
     setAnchorElUser(null);
   };
 
   return (
     <ThemeProvider theme={darkTheme}>
       <AppBar position="static">
-        <Container maxWidth="xl">
+        <Container maxWidth={false}>
           <Toolbar disableGutters>
             <AdbIcon sx={{ display: { xs: "flex", md: "flex", lg: "flex", xl: "flex" }, mr: 1 }} />
 
@@ -88,7 +90,7 @@ const AppHeader = observer(() => {
                 onClose={handleCloseUserMenu}
               >
                 {settings.map((setting) => (
-                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                  <MenuItem key={setting} onClick={handleCloseUserMenu(setting)}>
                     <Typography sx={{ textAlign: "center" }}>{setting}</Typography>
                   </MenuItem>
                 ))}

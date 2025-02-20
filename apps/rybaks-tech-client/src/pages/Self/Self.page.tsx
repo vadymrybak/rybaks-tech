@@ -8,7 +8,7 @@ export const Self = observer(() => {
   // const { appLoaded, user } = useStores();
   
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: "background.paper", display: "flex", height: "90vh" }}>
+    <Box sx={{ flexGrow: 1, bgcolor: "background.paper", display: "flex", height: "100%" }}>
       <SpeedDialComponent />
       <UserGames />
     </Box>

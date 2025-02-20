@@ -12,6 +12,7 @@ class SelfPageStore {
   rootStore: RootStore;
 
   gamesLoaded: boolean = false;
+  screenshotsLoaded: boolean = false;
   userGames: IUserGame[] = [];
   loadedScreenshots: IScreenshot[] = [];
   activeGameTab: number = 0;
@@ -21,6 +22,7 @@ class SelfPageStore {
 
     makeObservable(this, {
       gamesLoaded: observable,
+      screenshotsLoaded: observable,
       activeGameTab: observable,
       userGames: observable,
       handleTabChange: action.bound,
@@ -36,6 +38,7 @@ class SelfPageStore {
         .pipe(
           concatMap((games: IUserGame[]) => {
             runInAction(() => {
+              this.gamesLoaded = true;
               this.userGames = games;
               this.activeGameTab = this.userGames[0].id;
             });
@@ -48,13 +51,14 @@ class SelfPageStore {
         .subscribe({
           next: (fetchedScreenshots: IScreenshotResponse) => {
             runInAction(() => {
-              this.gamesLoaded = true;
+              this.screenshotsLoaded = true;
               this.loadedScreenshots = fetchedScreenshots.screenshots;
             });
           },
           error: (error) => {
             console.log(error);
             this.gamesLoaded = false;
+            this.screenshotsLoaded = false;
           },
         });
     } else {
@@ -80,18 +84,20 @@ class SelfPageStore {
   }
 
   handleTabChange(gameId: number) {
+    this.screenshotsLoaded = false;
+    this.activeGameTab = gameId;
+
     if (this.rootStore.user) {
       ApiService.getGameScreenshots(this.rootStore.user.id, gameId).subscribe({
         next: (fetchedScreenshots: IScreenshotResponse) => {
           runInAction(() => {
-            this.gamesLoaded = true;
-            this.activeGameTab = gameId;
+            this.screenshotsLoaded = true;
             this.loadedScreenshots = fetchedScreenshots.screenshots;
           });
         },
         error: (error) => {
           console.log(error);
-          this.gamesLoaded = false;
+          this.screenshotsLoaded = false;
         },
       });
     }
