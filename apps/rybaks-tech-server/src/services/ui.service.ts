@@ -1,6 +1,7 @@
 import { inject, injectable, Types } from "@biorate/inversion";
 import { Logger } from "@nestjs/common";
 import * as sharp from "sharp";
+import * as dayjs from "dayjs";
 import { Game, Screenshot, ScreenshotGameUser, User, UserGame } from "../models";
 import { ServiceApiSequelizeConnector } from "../connectors/SequelizeConnector";
 
@@ -84,19 +85,54 @@ export class UIService {
     this.logger.debug(`(getUserGameScreenshots) Processing request. userid: ${userid}, gameid: ${gameid}`);
 
     const screenshots = await Screenshot.findAll({
-      // attributes: ["name"],
+      // attributes: ["name", "createdat"],
+      order: [["createdat", "DESC"]],
       include: [{ model: ScreenshotGameUser, where: { userid }, include: [{ model: User }, { model: Game, where: { id: gameid } }] }],
     });
     // return screenshots;
+
+    const days: {
+      [date: string]: any[];
+    } = {};
+
+    for (let index = 0; index < screenshots.length; index++) {
+      const currentScreenshot = screenshots[index];
+      const sceenshotDate = dayjs(currentScreenshot.createdat).format("DD MMMM, YYYY");
+      if (days[sceenshotDate]) {
+        days[sceenshotDate].push({
+          id: currentScreenshot.id,
+          base64: currentScreenshot.base64,
+          name: currentScreenshot.name,
+          description: currentScreenshot.description,
+          updatedat: currentScreenshot.updatedat,
+          createdat: currentScreenshot.createdat,
+        });
+      } else {
+        days[sceenshotDate] = [
+          {
+            id: currentScreenshot.id,
+            base64: currentScreenshot.base64,
+            name: currentScreenshot.name,
+            description: currentScreenshot.description,
+            updatedat: currentScreenshot.updatedat,
+            createdat: currentScreenshot.createdat,
+          },
+        ];
+      }
+    }
+
     return {
-      screenshots: screenshots.map((s) => ({
-        id: s.id,
-        base64: s.base64,
-        name: s.name,
-        description: s.description,
-        updatedat: s.updatedat,
-        createdat: s.createdat,
-      })),
+      // screenshots: screenshots.map((s) => ({
+      //   id: s.id,
+      //   base64: s.base64,
+      //   name: s.name,
+      //   description: s.description,
+      //   updatedat: s.updatedat,
+      //   createdat: s.createdat,
+      // })),
+      screenshots: {
+        byDay: days,
+      },
       total: screenshots.length,
     };
   }

@@ -15,8 +15,14 @@ export interface IUserGame {
 }
 
 export interface IScreenshotResponse {
-  screenshots: IScreenshot[];
+  screenshots: {
+    byDay: IScreenshotByDay
+  };
   total: number;
+}
+
+export interface IScreenshotByDay {
+  [byDay: string]: IScreenshot[];
 }
 
 export interface IScreenshot {

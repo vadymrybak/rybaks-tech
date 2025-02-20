@@ -2,7 +2,7 @@ import { action, makeObservable, observable, runInAction } from "mobx";
 import { concatMap } from "rxjs/operators";
 import { RootStore } from "./RootStore";
 import { ApiService } from "../api/appUtilsService";
-import { IScreenshot, IScreenshotResponse, IUserGame } from "../types/apiService.interfaces";
+import { IScreenshotByDay, IScreenshotResponse, IUserGame } from "../types/apiService.interfaces";
 import { Logger } from "../utils/logger";
 
 class SelfPageStore {
@@ -14,7 +14,7 @@ class SelfPageStore {
   gamesLoaded: boolean = false;
   screenshotsLoaded: boolean = false;
   userGames: IUserGame[] = [];
-  loadedScreenshots: IScreenshot[] = [];
+  loadedScreenshots: IScreenshotByDay = {};
   activeGameTab: number = 0;
 
   constructor(rootStore: RootStore) {
@@ -52,7 +52,7 @@ class SelfPageStore {
           next: (fetchedScreenshots: IScreenshotResponse) => {
             runInAction(() => {
               this.screenshotsLoaded = true;
-              this.loadedScreenshots = fetchedScreenshots.screenshots;
+              this.loadedScreenshots = fetchedScreenshots.screenshots.byDay;
             });
           },
           error: (error) => {
@@ -92,7 +92,7 @@ class SelfPageStore {
         next: (fetchedScreenshots: IScreenshotResponse) => {
           runInAction(() => {
             this.screenshotsLoaded = true;
-            this.loadedScreenshots = fetchedScreenshots.screenshots;
+            this.loadedScreenshots = fetchedScreenshots.screenshots.byDay;
           });
         },
         error: (error) => {
