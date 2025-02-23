@@ -98,7 +98,7 @@ export class UIController {
     if (!files || files.length === 0) {
       throw new BadRequestException("No files were uploaded.");
     }
-    this.logger.debug(`(uploadFile) Incoming request. userid: ${userid}, gameid: ${gameid}, files length: ${files.length}`);
+    this.logger.debug(`(uploadFile) Incoming request. userid: ${userid}, gameid: ${gameid}, files length: ${files.length}, dateTaken: ${dateTaken}`);
 
     return this.uiService.uploadFiles(files, gameid, userid, dateTaken);
   }

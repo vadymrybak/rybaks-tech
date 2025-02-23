@@ -14,6 +14,8 @@ const style = {
 interface IScreenshotModalProps {
   isOpen: boolean;
   screenshot: IScreenshot | null;
+  gameid: number;
+  userid: number | undefined;
   handleClose: () => void;
 }
 
@@ -22,7 +24,7 @@ export default function ScreenshotModal(props: IScreenshotModalProps) {
     <div>
       <Modal open={props.isOpen} onClose={props.handleClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
         <Box sx={style}>
-          <img style={{ width: "95%" }} src={`https://app-screenshots.s3.cloud.ru/26-screenhots/1/${props.screenshot?.filename}`} />
+          <img style={{ width: "95%" }} src={`https://app-screenshots.s3.cloud.ru/${props.userid}-screenhots/${props.gameid}/${props.screenshot?.filename}`} />
         </Box>
       </Modal>
     </div>

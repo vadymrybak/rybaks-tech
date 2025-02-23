@@ -8,7 +8,7 @@ import { Loader } from "../Loader/Loader";
 
 import "./UserGames.styles.scss";
 
-const drawerWidth = 200;
+const drawerWidth = 80;
 
 const UserGames = observer(() => {
   const { selfPageStore } = useStores();

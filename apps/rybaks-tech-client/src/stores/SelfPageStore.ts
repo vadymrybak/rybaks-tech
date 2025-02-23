@@ -2,8 +2,9 @@ import { action, makeObservable, observable, runInAction } from "mobx";
 import { concatMap } from "rxjs/operators";
 import { RootStore } from "./RootStore";
 import { ApiService } from "../api/appUtilsService";
-import { IScreenshot, IScreenshotByDay, IScreenshotResponse, IUserGame } from "../types/apiService.interfaces";
+import { IScreenshot, IScreenshotByDay, IScreenshotResponse, IUser, IUserGame } from "../types/apiService.interfaces";
 import { Logger } from "../utils/logger";
+import { forkJoin } from "rxjs";
 
 class SelfPageStore {
   /**
@@ -67,10 +68,10 @@ class SelfPageStore {
             runInAction(() => {
               this.gamesLoaded = true;
               this.userGames = games;
-              this.activeGameTab = this.userGames[0].id;
+              this.activeGameTab = this.userGames[1].id;
             });
             if (this.rootStore.user) {
-              return ApiService.getGameScreenshots(this.rootStore.user.id, games[0].id);
+              return ApiService.getGameScreenshots(this.rootStore.user.id, games[1].id);
             }
             throw new Error("Could not game game list");
           }),
@@ -95,13 +96,31 @@ class SelfPageStore {
 
   uploadScreenshots(files: FileList) {
     Logger.debug(`uploadScreenshots - Uploading ${files.length} for gameid ${this.activeGameTab}`);
-
     this.uploadInProgress = true;
 
+    const toBeUploaded: { [key: string]: File[] } = {};
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index];
+      const dateTaken = new Date(file.lastModified).toLocaleDateString();
+      if (toBeUploaded[dateTaken]) {
+        toBeUploaded[dateTaken].push(file);
+      } else {
+        toBeUploaded[dateTaken] = [file];
+      }
+    }
+    console.log(toBeUploaded);
+
     if (this.rootStore.user) {
-      ApiService.uploadScreenshots(files, this.rootStore.user.id, this.activeGameTab).subscribe({
+      forkJoin(
+        Object.entries(toBeUploaded).map(([key, files]) => {
+          console.log(key, files);
+
+          return ApiService.uploadScreenshots(files, (this.rootStore.user as IUser).id, this.activeGameTab, new Date(key));
+        }),
+      ).subscribe({
         next: (data: any) => {
           runInAction(() => {
+            Logger.debug(data);
             this.uploadInProgress = false;
             this.handleTabChange(this.activeGameTab);
           });
@@ -111,6 +130,20 @@ class SelfPageStore {
           console.log(error);
         },
       });
+
+      // ApiService.uploadScreenshots(files, this.rootStore.user.id, this.activeGameTab, new Date()).subscribe({
+      //   next: (data: any) => {
+      //     runInAction(() => {
+      //       Logger.debug(data);
+      //       this.uploadInProgress = false;
+      //       this.handleTabChange(this.activeGameTab);
+      //     });
+      //   },
+      //   error: (error) => {
+      //     this.uploadInProgress = false;
+      //     console.log(error);
+      //   },
+      // });
     }
   }
 

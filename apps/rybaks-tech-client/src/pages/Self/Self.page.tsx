@@ -8,7 +8,7 @@ import ScreenshotModal from "../../components/ScreenshotModal/ScreenshotModal";
 import UploadInProgress from "../../components/UploadInProgress/UploadInProgress";
 
 export const Self = observer(() => {
-  const { selfPageStore } = useStores();
+  const { selfPageStore, user } = useStores();
 
   return (
     <Box sx={{ flexGrow: 1, bgcolor: "background.paper", display: "flex", height: "100%" }}>
@@ -21,6 +21,8 @@ export const Self = observer(() => {
         handleClose={() => {
           selfPageStore.toggleScreenshotModalOpen(false);
         }}
+        userid={user?.id}
+        gameid={selfPageStore.activeGameTab}
         screenshot={selfPageStore.activeScreenshot}
       />
     </Box>

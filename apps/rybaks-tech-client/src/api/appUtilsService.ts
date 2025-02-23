@@ -35,15 +35,14 @@ export class ApiService {
     );
   }
 
-  public static uploadScreenshots(files: FileList, userId: number, gameId: number): Observable<any> {
-    const dateTaken = new Date(files[0].lastModified);
+  public static uploadScreenshots(files: File[], userId: number, gameId: number, dateTaken: Date): Observable<any> {
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append("files", files[i]); // Use 'files' as this matches the controller's expected field name
-    }    
+    }
     return LeroyAjax(
       `api/user/${userId}/game/${gameId}/screenshots/upload`,
-      {dateTaken},
+      { dateTaken },
       "json",
       "POST",
       {
