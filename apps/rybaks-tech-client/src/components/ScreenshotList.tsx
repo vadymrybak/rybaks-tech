@@ -44,6 +44,10 @@ const ScreenshotList = observer(() => {
                   {screenshots.map((screenshot) => (
                     <ImageListItem key={screenshot.id}>
                       <img
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                          selfPageStore.handleThumbnailClick(screenshot);
+                        }}
                         srcSet={`data:image/jpeg;base64,${screenshot.base64}`}
                         src={`data:image/jpeg;base64,${screenshot.base64}`}
                         alt={screenshot.description}

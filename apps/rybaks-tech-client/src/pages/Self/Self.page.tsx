@@ -4,6 +4,8 @@ import SpeedDialComponent from "../../components/SpeedDial.component";
 import UserGames from "../../components/UserGames/UserGames.component";
 import { useStores } from "../../stores/RootStore";
 import CreateGameModal from "../../components/CreateGameModal/CreateGameModal";
+import ScreenshotModal from "../../components/ScreenshotModal/ScreenshotModal";
+import UploadInProgress from "../../components/UploadInProgress/UploadInProgress";
 
 export const Self = observer(() => {
   const { selfPageStore } = useStores();
@@ -13,6 +15,14 @@ export const Self = observer(() => {
       <SpeedDialComponent />
       <UserGames />
       <CreateGameModal open={selfPageStore.createGameModalOpen} />
+      <UploadInProgress isOpen={selfPageStore.uploadInProgress} />
+      <ScreenshotModal
+        isOpen={selfPageStore.screenshotModalOpen}
+        handleClose={() => {
+          selfPageStore.toggleScreenshotModalOpen(false);
+        }}
+        screenshot={selfPageStore.activeScreenshot}
+      />
     </Box>
   );
 });

@@ -2,6 +2,7 @@ import { inject, injectable, Types } from "@biorate/inversion";
 import { Logger } from "@nestjs/common";
 import * as sharp from "sharp";
 import * as dayjs from "dayjs";
+import { S3Helper } from ".";
 import { Game, Screenshot, ScreenshotGameUser, User, UserGame } from "../models";
 import { ServiceApiSequelizeConnector } from "../connectors/SequelizeConnector";
 
@@ -16,6 +17,8 @@ export class UIService {
 
   @inject(Types.ServiceApiSequelizeConnector) connector: ServiceApiSequelizeConnector;
 
+  @inject(Types.S3Helper) s3Helper: S3Helper;
+
   public async getUser(userid: number) {
     this.logger.debug(`(getUser) Processing request. userid: ${userid}`);
     const user = await User.findByPk(userid, { attributes: ["id", "email", "firstname", "lastname"] });
@@ -28,42 +31,6 @@ export class UIService {
       include: [{ model: UserGame, include: [{ model: Game, attributes: ["id", "name", "icon"] }] }],
     });
     return user.games.map((game) => game.game);
-  }
-
-  public async uploadFiles(files: Express.Multer.File[], gameid: number, userid: number) {
-    this.logger.debug(`(uploadFiles) Processing request. files: ${files.length}, gameid: ${gameid}, userid: ${userid}`);
-
-    this.logger.debug(`(uploadFiles) Converting ${files.length} files to base64...`);
-    const b64Images: IConvertedImage[] = [];
-    for (let index = 0; index < files.length; index++) {
-      let loopImage = files[index];
-      const im = sharp(loopImage.buffer);
-      const toPut = (await im.resize(400).toFormat("jpeg").toBuffer()).toString("base64");
-      b64Images.push({
-        base64: toPut,
-        filename: loopImage.originalname,
-      });
-    }
-    this.logger.debug(`(uploadFiles) Done converting ${files.length} files to base64`);
-    this.logger.debug(`(uploadFiles) Uploading ${files.length} files to DB...`);
-
-    const transaction = await this.connector.connection("rybaksTech").transaction(async () => {
-      const s = await Screenshot.bulkCreate(
-        b64Images.map((img, index) => ({ base64: img.base64, filename: img.filename, name: `image-${index}`, description: `description-${index}` })),
-      );
-      const screenshotIds = s.map((a) => a.id);
-
-      this.logger.debug(`(uploadFiles) Screenshot id-s to be uploaded to db: ${screenshotIds.join(",")}`);
-
-      await ScreenshotGameUser.bulkCreate(
-        screenshotIds.map((screenshotid) => ({
-          screenshotid,
-          userid,
-          gameid,
-        })),
-      );
-    });
-    return "Done";
   }
 
   public async getUserScreenshots(userid: number) {
@@ -103,6 +70,7 @@ export class UIService {
           id: currentScreenshot.id,
           base64: currentScreenshot.base64,
           name: currentScreenshot.name,
+          filename: currentScreenshot.filename,
           description: currentScreenshot.description,
           updatedat: currentScreenshot.updatedat,
           createdat: currentScreenshot.createdat,
@@ -113,6 +81,7 @@ export class UIService {
             id: currentScreenshot.id,
             base64: currentScreenshot.base64,
             name: currentScreenshot.name,
+            filename: currentScreenshot.filename,
             description: currentScreenshot.description,
             updatedat: currentScreenshot.updatedat,
             createdat: currentScreenshot.createdat,
@@ -135,5 +104,54 @@ export class UIService {
       },
       total: screenshots.length,
     };
+  }
+
+  public async uploadFiles(files: Express.Multer.File[], gameid: number, userid: number, dateTaken: Date) {
+    this.logger.debug(`(uploadFiles) Processing request. files: ${files.length}, gameid: ${gameid}, userid: ${userid}`);
+
+    const s3UserFolder = `${userid}-screenhots/${gameid}`;
+    const b64Images: IConvertedImage[] = [];
+
+    this.logger.debug(`(uploadFiles) Uploading original files to S3 and converting ${files.length} files to base64...`);
+    for (let index = 0; index < files.length; index++) {
+      let loopImage = files[index];
+
+      const res = await this.s3Helper.uploadScreenshot(s3UserFolder, loopImage);
+      this.logger.debug(`(uploadFiles) File ${index + 1}/${files.length}  - ${loopImage.originalname} result: ${res.$metadata.httpStatusCode}`);
+
+      const im = sharp(loopImage.buffer);
+      const toPut = (await im.resize(400).toFormat("jpeg").toBuffer()).toString("base64");
+      b64Images.push({
+        base64: toPut,
+        filename: loopImage.originalname,
+      });
+    }
+    this.logger.debug(`(uploadFiles) Done converting ${files.length} files to base64`);
+    this.logger.debug(`(uploadFiles) Uploading ${files.length} files to DB...`);
+
+    const transaction = await this.connector.connection("rybaksTech").transaction(async () => {
+      const s = await Screenshot.bulkCreate(
+        b64Images.map((img, index) => ({
+          base64: img.base64,
+          createdat: dayjs(new Date(dateTaken)).toDate(),
+          filename: img.filename,
+          name: `image-${index}`,
+          description: `description-${index}`,
+        })),
+        { logging: false },
+      );
+      const screenshotIds = s.map((a) => a.id);
+
+      this.logger.debug(`(uploadFiles) Screenshot id-s to be uploaded to db: ${screenshotIds.join(",")}`);
+
+      await ScreenshotGameUser.bulkCreate(
+        screenshotIds.map((screenshotid) => ({
+          screenshotid,
+          userid,
+          gameid,
+        })),
+      );
+    });
+    return "Done";
   }
 }

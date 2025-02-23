@@ -2,12 +2,25 @@ import { IConfig } from "@biorate/config";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { inject, Types } from "@biorate/inversion";
 import { ApiOperation } from "@nestjs/swagger";
-import { Controller, Get, Logger, Param, ParseIntPipe, Post, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  UnauthorizedException,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
 import { UIService } from "../../../services";
 import { UserDecorator } from "../decorators";
 import { JwtGuard } from "../guards";
 
-const devApiDelay = 500;
+// const devApiDelay = 500;
 
 @Controller("api")
 @UseGuards(JwtGuard)
@@ -47,7 +60,7 @@ export class UIController {
   public async getUserGames(@Param("id", new ParseIntPipe()) id: number) {
     this.logger.debug(`(getUserGames) Incoming request. id: ${id}`);
 
-    await new Promise((resolve) => setTimeout(resolve, devApiDelay));
+    // await new Promise((resolve) => setTimeout(resolve, devApiDelay));
 
     return this.uiService.getUserGames(id);
   }
@@ -56,7 +69,7 @@ export class UIController {
   public async getUserScreenshots(@Param("id", new ParseIntPipe()) id: number) {
     this.logger.debug(`(getUserScreenshots) Incoming request. id: ${id}`);
 
-    await new Promise((resolve) => setTimeout(resolve, devApiDelay));
+    // await new Promise((resolve) => setTimeout(resolve, devApiDelay));
 
     return this.uiService.getUserScreenshots(id);
   }
@@ -65,7 +78,7 @@ export class UIController {
   public async getUserGameScreenshots(@Param("userid", new ParseIntPipe()) userid: number, @Param("gameid", new ParseIntPipe()) gameid: number) {
     this.logger.debug(`(getUserGameScreenshots) Incoming request. id: ${userid}, gameid: ${gameid}`);
 
-    await new Promise((resolve) => setTimeout(resolve, devApiDelay));
+    // await new Promise((resolve) => setTimeout(resolve, devApiDelay));
 
     return this.uiService.getUserGameScreenshots(userid, gameid);
   }
@@ -76,9 +89,17 @@ export class UIController {
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Param("userid", new ParseIntPipe()) userid: number,
     @Param("gameid", new ParseIntPipe()) gameid: number,
+    @Query("dateTaken") dateTaken: Date,
+    @UserDecorator("sub") sub: number,
   ) {
-    this.logger.debug(`(uploadFile) Incoming request. files: ${files.length}`);
+    if (userid !== sub) {
+      throw new UnauthorizedException();
+    }
+    if (!files || files.length === 0) {
+      throw new BadRequestException("No files were uploaded.");
+    }
+    this.logger.debug(`(uploadFile) Incoming request. userid: ${userid}, gameid: ${gameid}, files length: ${files.length}`);
 
-    return this.uiService.uploadFiles(files, gameid, userid);
+    return this.uiService.uploadFiles(files, gameid, userid, dateTaken);
   }
 }

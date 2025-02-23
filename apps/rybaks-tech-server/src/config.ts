@@ -11,7 +11,7 @@ import { ServiceApiSequelizeConnector } from "./connectors/SequelizeConnector";
 import { Application } from "./application";
 import { IApplication } from "./interfaces";
 import { Test } from "./test";
-import { AuthService, BJwtService, JwtStrategy, UIService } from "./services";
+import { AuthService, BJwtService, JwtStrategy, S3Helper, UIService } from "./services";
 
 export class Root extends Core() {
   @inject(Types.Config) public readonly config: IConfig;
@@ -27,6 +27,8 @@ export class Root extends Core() {
   @inject(Types.Prometheus) public readonly prometheus: IPrometheus;
 
   @inject(Types.ServiceApiSequelizeConnector) public connector: ISequelizeConnector;
+
+  @inject(Types.S3Helper) public s3Helper: S3Helper;
 
   @inject(Types.Test) public readonly test: Test;
 
@@ -53,3 +55,4 @@ container.bind<AuthService>(Types.AuthService).to(AuthService).inSingletonScope(
 container.bind<BJwtService>(Types.BJwtService).to(BJwtService).inSingletonScope();
 container.bind<JwtStrategy>(Types.JwtStrategy).to(JwtStrategy).inSingletonScope();
 container.bind<UIService>(Types.UIService).to(UIService).inSingletonScope();
+container.bind<S3Helper>(Types.S3Helper).to(S3Helper).inSingletonScope();
