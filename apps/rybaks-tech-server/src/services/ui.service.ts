@@ -93,6 +93,21 @@ export class UIService {
     };
   }
 
+  public async createUserGame(gameName: string, base64icon: string, userid: number) {
+    const transaction = await this.connector.connection("rybaksTech").transaction(async () => {
+      const gameCreateResult = await Game.create({
+        name: gameName,
+        icon: base64icon,
+      });
+      const gameAssignToUserResult = await UserGame.create({
+        userid,
+        gameid: gameCreateResult.id,
+      });
+    });
+
+    return transaction;
+  }
+
   public async uploadFiles(files: Express.Multer.File[], gameid: number, userid: number, dates: string[]) {
     this.logger.debug(`(uploadFiles) Processing request. files: ${files.length}, gameid: ${gameid}, userid: ${userid}`);
 

@@ -3,7 +3,7 @@ import { RootStore } from "./RootStore";
 import { ApiService } from "../api/appUtilsService";
 import { IScreenshot, IScreenshotByDay, IScreenshotResponse, IUser, IUserGame } from "../types/apiService.interfaces";
 import { Logger } from "../utils/logger";
-import { Observable, Subscription } from "rxjs";
+import { Subscription } from "rxjs";
 
 class SelfPageStore {
   /**
@@ -13,6 +13,7 @@ class SelfPageStore {
 
   gamesLoaded: boolean = false;
   screenshotsLoading: boolean = false;
+  gameCreating: boolean = false;
   uploadInProgress: boolean = false;
   endReached: boolean = false;
 
@@ -35,6 +36,7 @@ class SelfPageStore {
     this.rootStore = rootStore;
 
     makeObservable(this, {
+      gameCreating: observable,
       gamesLoaded: observable,
       endReached: observable,
       filesAmount: observable,
@@ -54,6 +56,7 @@ class SelfPageStore {
       toggleScreenshotModalOpen: action.bound,
       handleThumbnailClick: action.bound,
       handleFetchMoreItems: action.bound,
+      handleCreateNewGame: action.bound,
     });
   }
 
@@ -191,6 +194,49 @@ class SelfPageStore {
         error: (error) => {
           console.error(error);
           this.screenshotsLoading = false;
+        },
+      });
+    }
+  }
+
+  handleCreateNewGame(gameName: string, base64icon: string) {
+    Logger.debug(`Create game - gameName: ${gameName}`);
+
+    this.gameCreating = true;
+    if (this.rootStore.user) {
+      ApiService.createGame(this.rootStore.user?.id, gameName, base64icon).subscribe({
+        next: (response: any) => {
+          Logger.debug(`Game created: ${response}`);
+          this.gameCreating = false;
+          this.createGameModalOpen = false;
+          this.userGames = [];
+
+          if (this.rootStore.user) {
+            ApiService.getUserGames(this.rootStore.user.id).subscribe({
+              next: (games: IUserGame[]) => {
+                runInAction(() => {
+                  this.gamesLoaded = true;
+                  this.userGames = games.sort((a, b) => {
+                    var keyA = a.name,
+                      keyB = b.name;
+                    // Compare the 2 dates
+                    if (keyA < keyB) return -1;
+                    if (keyA > keyB) return 1;
+                    return 0;
+                  });
+                  this.activeGameTab = this.userGames[0].id;
+                });
+              },
+              error: (error) => {
+                console.error(error);
+                this.gamesLoaded = false;
+              },
+            });
+          }
+        },
+        error: (error) => {
+          console.error(error);
+          this.gameCreating = false;
         },
       });
     }

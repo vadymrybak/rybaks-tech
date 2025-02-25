@@ -89,6 +89,22 @@ export class UIController {
     return this.uiService.getUserGameScreenshots(userid, gameid, from, size);
   }
 
+  @Post("user/:userid/game/create")
+  public createGame(
+    @Param("userid", new ParseIntPipe()) userid: number,
+    @UserDecorator("sub") sub: number,
+    @Body("gameName") gameName: string,
+    @Body("base64icon") base64icon: string,
+  ) {
+    this.logger.debug(`(createGame) Incoming request. userid: ${userid}, gameName: ${gameName}, base64icon: ${base64icon}`);
+
+    if (userid !== sub) {
+      throw new UnauthorizedException();
+    }
+
+    return this.uiService.createUserGame(gameName, base64icon, userid);
+  }
+
   @Post("user/:userid/game/:gameid/screenshots/upload")
   @UseInterceptors(FilesInterceptor("files"))
   public uploadFile(

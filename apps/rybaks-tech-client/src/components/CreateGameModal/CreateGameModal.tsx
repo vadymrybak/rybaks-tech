@@ -15,10 +15,13 @@ const style = {
 
 interface CreateGameModalProps {
   open: boolean;
+  gameCreating: boolean;
+  handleClose: () => void;
+  handleGameCreate: (gameName: string, base64icon: string) => void;
 }
 
 const CreateGameModal = (props: CreateGameModalProps) => {
-  const [formData, setFormData] = useState({ name: "", email: "" });
+  const [formData, setFormData] = useState({ gameName: "", base64icon: "" });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -29,20 +32,46 @@ const CreateGameModal = (props: CreateGameModalProps) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFormData({ base64icon: "", gameName: "" });
+    props.handleGameCreate(formData.gameName, formData.base64icon);
   };
 
   return (
     <div>
-      <Modal open={props.open}>
+      <Modal open={props.open} onClose={props.handleClose}>
         <Box sx={style}>
           <Typography variant="h6" component="h2">
-            Modal Title
+            Добавить новую игру
           </Typography>
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
-            <TextField label="Name" variant="outlined" name="name" value={formData.name} onChange={handleChange} margin="normal" />
-            <TextField label="Email" variant="outlined" name="email" value={formData.email} onChange={handleChange} margin="normal" />
-            <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-              Submit
+            <TextField
+              autoComplete="off"
+              label="Название игры"
+              variant="outlined"
+              name="gameName"
+              value={formData.gameName}
+              onChange={handleChange}
+              margin="normal"
+            />
+            <TextField
+              multiline
+              maxRows={5}
+              autoComplete="off"
+              label="Base64 иконка"
+              variant="outlined"
+              name="base64icon"
+              value={formData.base64icon}
+              onChange={handleChange}
+              margin="normal"
+            />
+            <Button
+              loading={props.gameCreating}
+              disabled={props.gameCreating || formData.base64icon.length === 0 || formData.gameName.length === 0}
+              type="submit"
+              variant="contained"
+              sx={{ mt: 2 }}
+            >
+              Создать
             </Button>
           </form>
         </Box>

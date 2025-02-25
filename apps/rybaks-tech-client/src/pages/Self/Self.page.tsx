@@ -14,9 +14,19 @@ export const Self = observer(() => {
     <Box sx={{ flexGrow: 1, bgcolor: "background.paper", display: "flex", height: "100%" }}>
       <SpeedDialComponent />
       <UserGames />
-      <CreateGameModal open={selfPageStore.createGameModalOpen} />
-      {/* <UploadInProgress amount={selfPageStore.filesAmount} isOpen={true} /> */}
-      <UploadInProgress gameName={selfPageStore.userGames.find(g => g.id === selfPageStore.activeGameTab)?.name} amount={selfPageStore.filesAmount} isOpen={selfPageStore.uploadInProgress} />
+      <UploadInProgress
+        gameName={selfPageStore.userGames.find((g) => g.id === selfPageStore.activeGameTab)?.name}
+        amount={selfPageStore.filesAmount}
+        isOpen={selfPageStore.uploadInProgress}
+      />
+      <CreateGameModal
+        gameCreating={selfPageStore.gameCreating}
+        handleGameCreate={selfPageStore.handleCreateNewGame}
+        open={selfPageStore.createGameModalOpen}
+        handleClose={() => {
+          selfPageStore.toggleCreateGameModalOpen(false);
+        }}
+      />
       <ScreenshotModal
         isOpen={selfPageStore.screenshotModalOpen}
         handleClose={() => {
