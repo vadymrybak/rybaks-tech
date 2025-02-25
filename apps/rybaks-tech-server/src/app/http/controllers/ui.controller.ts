@@ -75,12 +75,17 @@ export class UIController {
   }
 
   @Get("user/:userid/game/:gameid/screenshots")
-  public async getUserGameScreenshots(@Param("userid", new ParseIntPipe()) userid: number, @Param("gameid", new ParseIntPipe()) gameid: number) {
+  public async getUserGameScreenshots(
+    @Param("userid", new ParseIntPipe()) userid: number,
+    @Param("gameid", new ParseIntPipe()) gameid: number,
+    @Query("from") from: number,
+    @Query("size") size: number,
+  ) {
     this.logger.debug(`(getUserGameScreenshots) Incoming request. id: ${userid}, gameid: ${gameid}`);
 
     // await new Promise((resolve) => setTimeout(resolve, devApiDelay));
 
-    return this.uiService.getUserGameScreenshots(userid, gameid);
+    return this.uiService.getUserGameScreenshots(userid, gameid, from, size);
   }
 
   @Post("user/:userid/game/:gameid/screenshots/upload")

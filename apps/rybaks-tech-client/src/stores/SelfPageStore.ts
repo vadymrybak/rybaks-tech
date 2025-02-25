@@ -1,5 +1,4 @@
 import { action, makeObservable, observable, runInAction } from "mobx";
-import { concatMap } from "rxjs/operators";
 import { RootStore } from "./RootStore";
 import { ApiService } from "../api/appUtilsService";
 import { IScreenshot, IScreenshotByDay, IScreenshotResponse, IUser, IUserGame } from "../types/apiService.interfaces";
@@ -13,8 +12,9 @@ class SelfPageStore {
   rootStore: RootStore;
 
   gamesLoaded: boolean = false;
-  screenshotsLoaded: boolean = false;
+  screenshotsLoading: boolean = false;
   uploadInProgress: boolean = false;
+  endReached: boolean = false;
 
   createGameModalOpen: boolean = false;
   screenshotModalOpen: boolean = false;
@@ -24,24 +24,31 @@ class SelfPageStore {
   activeGameTab: number = 0;
   activeScreenshot: IScreenshot | null = null;
 
+  from: number = 0;
+  size: number = 100;
+
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
 
     makeObservable(this, {
       gamesLoaded: observable,
-      screenshotsLoaded: observable,
+      endReached: observable,
+      screenshotsLoading: observable,
       uploadInProgress: observable,
       screenshotModalOpen: observable,
       createGameModalOpen: observable,
       activeScreenshot: observable,
       activeGameTab: observable,
       userGames: observable,
+      from: observable,
+      size: observable,
       handleTabChange: action.bound,
       uploadScreenshots: action.bound,
       loadView: action.bound,
       toggleCreateGameModalOpen: action.bound,
       toggleScreenshotModalOpen: action.bound,
       handleThumbnailClick: action.bound,
+      handleFetchMoreItems: action.bound,
     });
   }
 
@@ -62,33 +69,26 @@ class SelfPageStore {
   loadView() {
     this.gamesLoaded = false;
     if (this.rootStore.user) {
-      ApiService.getUserGames(this.rootStore.user.id)
-        .pipe(
-          concatMap((games: IUserGame[]) => {
-            runInAction(() => {
-              this.gamesLoaded = true;
-              this.userGames = games;
-              this.activeGameTab = this.userGames[1].id;
+      ApiService.getUserGames(this.rootStore.user.id).subscribe({
+        next: (games: IUserGame[]) => {
+          runInAction(() => {
+            this.gamesLoaded = true;
+            this.userGames = games.sort((a, b) => {
+              var keyA = a.name,
+                keyB = b.name;
+              // Compare the 2 dates
+              if (keyA < keyB) return -1;
+              if (keyA > keyB) return 1;
+              return 0;
             });
-            if (this.rootStore.user) {
-              return ApiService.getGameScreenshots(this.rootStore.user.id, games[1].id);
-            }
-            throw new Error("Could not game game list");
-          }),
-        )
-        .subscribe({
-          next: (fetchedScreenshots: IScreenshotResponse) => {
-            runInAction(() => {
-              this.screenshotsLoaded = true;
-              this.loadedScreenshots = fetchedScreenshots.screenshots.byDay;
-            });
-          },
-          error: (error) => {
-            console.log(error);
-            this.gamesLoaded = false;
-            this.screenshotsLoaded = false;
-          },
-        });
+            this.activeGameTab = this.userGames[0].id;
+          });
+        },
+        error: (error) => {
+          console.error(error);
+          this.gamesLoaded = false;
+        },
+      });
     } else {
       throw new Error("User is undefined");
     }
@@ -108,13 +108,10 @@ class SelfPageStore {
         toBeUploaded[dateTaken] = [file];
       }
     }
-    console.log(toBeUploaded);
 
     if (this.rootStore.user) {
       forkJoin(
         Object.entries(toBeUploaded).map(([key, files]) => {
-          console.log(key, files);
-
           return ApiService.uploadScreenshots(files, (this.rootStore.user as IUser).id, this.activeGameTab, new Date(key));
         }),
       ).subscribe({
@@ -127,41 +124,69 @@ class SelfPageStore {
         },
         error: (error) => {
           this.uploadInProgress = false;
-          console.log(error);
+          console.error(error);
         },
       });
-
-      // ApiService.uploadScreenshots(files, this.rootStore.user.id, this.activeGameTab, new Date()).subscribe({
-      //   next: (data: any) => {
-      //     runInAction(() => {
-      //       Logger.debug(data);
-      //       this.uploadInProgress = false;
-      //       this.handleTabChange(this.activeGameTab);
-      //     });
-      //   },
-      //   error: (error) => {
-      //     this.uploadInProgress = false;
-      //     console.log(error);
-      //   },
-      // });
     }
   }
 
   handleTabChange(gameId: number) {
-    this.screenshotsLoaded = false;
+    this.screenshotsLoading = true;
+    this.endReached = false;
+    this.from = 0;
     this.activeGameTab = gameId;
 
     if (this.rootStore.user) {
-      ApiService.getGameScreenshots(this.rootStore.user.id, gameId).subscribe({
+      ApiService.getGameScreenshots(this.rootStore.user.id, gameId, this.from, this.size).subscribe({
         next: (fetchedScreenshots: IScreenshotResponse) => {
           runInAction(() => {
-            this.screenshotsLoaded = true;
+            this.screenshotsLoading = false;
+            this.from += this.size;
             this.loadedScreenshots = fetchedScreenshots.screenshots.byDay;
           });
         },
         error: (error) => {
-          console.log(error);
-          this.screenshotsLoaded = false;
+          console.error(error);
+          this.screenshotsLoading = false;
+        },
+      });
+    }
+  }
+
+  handleFetchMoreItems() {
+    this.screenshotsLoading = true;
+
+    if (this.rootStore.user) {
+      ApiService.getGameScreenshots(this.rootStore.user.id, this.activeGameTab, this.from, this.size).subscribe({
+        next: (fetchedScreenshots: IScreenshotResponse) => {
+          runInAction(() => {
+            this.screenshotsLoading = false;
+
+            const lastDayInCurrent = Object.keys(this.loadedScreenshots)[Object.keys(this.loadedScreenshots).length - 1];
+            const firstDayInIncoming = Object.keys(fetchedScreenshots.screenshots.byDay)[0];
+
+            if (Object.keys(fetchedScreenshots.screenshots.byDay).length > 0 && !this.endReached) {
+              if (lastDayInCurrent && firstDayInIncoming) {
+                if (lastDayInCurrent === firstDayInIncoming) {
+                  this.loadedScreenshots[lastDayInCurrent].push(...fetchedScreenshots.screenshots.byDay[firstDayInIncoming]);
+                  delete fetchedScreenshots.screenshots.byDay[firstDayInIncoming];
+                }
+                this.loadedScreenshots = {
+                  ...this.loadedScreenshots,
+                  ...fetchedScreenshots.screenshots.byDay,
+                };
+              } else {
+                this.loadedScreenshots = fetchedScreenshots.screenshots.byDay;
+              }
+              this.from += this.size;
+            } else {
+              this.endReached = true;
+            }
+          });
+        },
+        error: (error) => {
+          console.error(error);
+          this.screenshotsLoading = false;
         },
       });
     }

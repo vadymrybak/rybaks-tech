@@ -74,7 +74,7 @@ export class RootStore {
         });
       },
       error: (error) => {
-        console.log(error);
+        console.error(error);
         this.viewLoaded = false;
       },
     });
@@ -109,7 +109,7 @@ export class RootStore {
         });
       },
       error: (error) => {
-        console.log(error);
+        console.error(error);
       },
     });
   }
@@ -127,7 +127,7 @@ export class RootStore {
         });
       },
       error: (error) => {
-        console.log(error);
+        console.error(error);
         this.isLoggingIn = false;
       },
     });

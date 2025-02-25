@@ -29,7 +29,6 @@ const CreateGameModal = (props: CreateGameModalProps) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
   };
 
   return (

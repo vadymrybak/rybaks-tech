@@ -59,7 +59,7 @@ const UserGames = observer(() => {
             </List>
           </Drawer>
           <Box component="main" sx={{ flexGrow: 1, bgcolor: "background.default", p: 0 }}>
-            {selfPageStore.screenshotsLoaded ? <ScreenshotList /> : <Loader />}
+            {selfPageStore.gamesLoaded ? <ScreenshotList /> : <Loader />}
           </Box>
         </>
       ) : (

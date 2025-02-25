@@ -48,12 +48,14 @@ export class UIService {
     }));
   }
 
-  public async getUserGameScreenshots(userid: number, gameid: number) {
-    this.logger.debug(`(getUserGameScreenshots) Processing request. userid: ${userid}, gameid: ${gameid}`);
+  public async getUserGameScreenshots(userid: number, gameid: number, from: number, size: number) {
+    this.logger.debug(`(getUserGameScreenshots) Processing request. userid: ${userid}, gameid: ${gameid}, from: ${from}, size: ${size}`);
 
     const screenshots = await Screenshot.findAll({
       // attributes: ["name", "createdat"],
       order: [["createdat", "DESC"]],
+      offset: from,
+      limit: size,
       include: [{ model: ScreenshotGameUser, where: { userid }, include: [{ model: User }, { model: Game, where: { id: gameid } }] }],
     });
     // return screenshots;
@@ -65,43 +67,28 @@ export class UIService {
     for (let index = 0; index < screenshots.length; index++) {
       const currentScreenshot = screenshots[index];
       const sceenshotDate = dayjs(currentScreenshot.createdat).format("DD MMMM, YYYY");
+      const screen = {
+        id: currentScreenshot.id,
+        base64: currentScreenshot.base64,
+        name: currentScreenshot.name,
+        filename: currentScreenshot.filename,
+        description: currentScreenshot.description,
+        updatedat: currentScreenshot.updatedat,
+        createdat: currentScreenshot.createdat,
+      };
       if (days[sceenshotDate]) {
-        days[sceenshotDate].push({
-          id: currentScreenshot.id,
-          base64: currentScreenshot.base64,
-          name: currentScreenshot.name,
-          filename: currentScreenshot.filename,
-          description: currentScreenshot.description,
-          updatedat: currentScreenshot.updatedat,
-          createdat: currentScreenshot.createdat,
-        });
+        days[sceenshotDate].push(screen);
       } else {
-        days[sceenshotDate] = [
-          {
-            id: currentScreenshot.id,
-            base64: currentScreenshot.base64,
-            name: currentScreenshot.name,
-            filename: currentScreenshot.filename,
-            description: currentScreenshot.description,
-            updatedat: currentScreenshot.updatedat,
-            createdat: currentScreenshot.createdat,
-          },
-        ];
+        days[sceenshotDate] = [screen];
       }
     }
 
     return {
-      // screenshots: screenshots.map((s) => ({
-      //   id: s.id,
-      //   base64: s.base64,
-      //   name: s.name,
-      //   description: s.description,
-      //   updatedat: s.updatedat,
-      //   createdat: s.createdat,
-      // })),
       screenshots: {
         byDay: days,
       },
+      from,
+      size,
       total: screenshots.length,
     };
   }

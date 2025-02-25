@@ -4,6 +4,7 @@ import { apiRetryTimes } from "./constants";
 import { LeroyAjax } from "./LeroyObservable";
 import { VariablesResponse } from "../types/variablesResponse";
 import { IScreenshotResponse, IUser, IUserGame } from "../types/apiService.interfaces";
+import { Logger } from "../utils/logger";
 
 export class ApiService {
   public static token: string | null = null;
@@ -65,8 +66,9 @@ export class ApiService {
     );
   }
 
-  public static getGameScreenshots(userId: number, gameId: number): Observable<IScreenshotResponse> {
-    return LeroyAjax(`/api/user/${userId}/game/${gameId}/screenshots`, {}, "json", "GET", {
+  public static getGameScreenshots(userId: number, gameId: number, from: number, size: number): Observable<IScreenshotResponse> {
+    Logger.debug(`(ApiService - getGameScreenshots) userId: ${userId}, gameId: ${gameId}, from: ${from}, size: ${size}`);
+    return LeroyAjax(`/api/user/${userId}/game/${gameId}/screenshots`, { from, size }, "json", "GET", {
       Authorization: `Bearer ${ApiService.token}`,
     }).pipe(
       map((data) => data.response),
