@@ -93,7 +93,7 @@ export class UIService {
     };
   }
 
-  public async uploadFiles(files: Express.Multer.File[], gameid: number, userid: number, dateTaken: Date) {
+  public async uploadFiles(files: Express.Multer.File[], gameid: number, userid: number, dates: string[]) {
     this.logger.debug(`(uploadFiles) Processing request. files: ${files.length}, gameid: ${gameid}, userid: ${userid}`);
 
     const s3UserFolder = `${userid}-screenhots/${gameid}`;
@@ -118,13 +118,15 @@ export class UIService {
 
     const transaction = await this.connector.connection("rybaksTech").transaction(async () => {
       const s = await Screenshot.bulkCreate(
-        b64Images.map((img, index) => ({
-          base64: img.base64,
-          createdat: dayjs(new Date(dateTaken)).toDate(),
-          filename: img.filename,
-          name: `image-${index}`,
-          description: `description-${index}`,
-        })),
+        b64Images.map((img, index) => {
+          return {
+            base64: img.base64,
+            createdat: new Date(parseInt(dates[index], 10)),
+            filename: img.filename,
+            name: `image-${index}`,
+            description: `description-${index}`,
+          };
+        }),
         { logging: false },
       );
       const screenshotIds = s.map((a) => a.id);

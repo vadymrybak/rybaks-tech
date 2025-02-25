@@ -15,7 +15,8 @@ export const Self = observer(() => {
       <SpeedDialComponent />
       <UserGames />
       <CreateGameModal open={selfPageStore.createGameModalOpen} />
-      <UploadInProgress isOpen={selfPageStore.uploadInProgress} />
+      {/* <UploadInProgress amount={selfPageStore.filesAmount} isOpen={true} /> */}
+      <UploadInProgress gameName={selfPageStore.userGames.find(g => g.id === selfPageStore.activeGameTab)?.name} amount={selfPageStore.filesAmount} isOpen={selfPageStore.uploadInProgress} />
       <ScreenshotModal
         isOpen={selfPageStore.screenshotModalOpen}
         handleClose={() => {

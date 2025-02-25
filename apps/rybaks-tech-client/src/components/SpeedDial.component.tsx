@@ -28,7 +28,7 @@ export default function SpeedDialComponent() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files) {
+    if (files && files.length > 0) {
       selfPageStore.uploadScreenshots(files);
     }
   };

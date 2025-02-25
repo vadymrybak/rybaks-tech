@@ -3,7 +3,7 @@ import { RootStore } from "./RootStore";
 import { ApiService } from "../api/appUtilsService";
 import { IScreenshot, IScreenshotByDay, IScreenshotResponse, IUser, IUserGame } from "../types/apiService.interfaces";
 import { Logger } from "../utils/logger";
-import { forkJoin } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 
 class SelfPageStore {
   /**
@@ -27,12 +27,17 @@ class SelfPageStore {
   from: number = 0;
   size: number = 100;
 
+  filesAmount: number = 0;
+
+  uploading$: Subscription = new Subscription();
+
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
 
     makeObservable(this, {
       gamesLoaded: observable,
       endReached: observable,
+      filesAmount: observable,
       screenshotsLoading: observable,
       uploadInProgress: observable,
       screenshotModalOpen: observable,
@@ -97,6 +102,7 @@ class SelfPageStore {
   uploadScreenshots(files: FileList) {
     Logger.debug(`uploadScreenshots - Uploading ${files.length} for gameid ${this.activeGameTab}`);
     this.uploadInProgress = true;
+    this.filesAmount = files.length;
 
     const toBeUploaded: { [key: string]: File[] } = {};
     for (let index = 0; index < files.length; index++) {
@@ -110,11 +116,7 @@ class SelfPageStore {
     }
 
     if (this.rootStore.user) {
-      forkJoin(
-        Object.entries(toBeUploaded).map(([key, files]) => {
-          return ApiService.uploadScreenshots(files, (this.rootStore.user as IUser).id, this.activeGameTab, new Date(key));
-        }),
-      ).subscribe({
+      ApiService.uploadScreenshots(files, (this.rootStore.user as IUser).id, this.activeGameTab).subscribe({
         next: (data: any) => {
           runInAction(() => {
             Logger.debug(data);
@@ -134,10 +136,12 @@ class SelfPageStore {
     this.screenshotsLoading = true;
     this.endReached = false;
     this.from = 0;
+    this.loadedScreenshots = {};
     this.activeGameTab = gameId;
+    this.uploading$.unsubscribe();
 
     if (this.rootStore.user) {
-      ApiService.getGameScreenshots(this.rootStore.user.id, gameId, this.from, this.size).subscribe({
+      this.uploading$ = ApiService.getGameScreenshots(this.rootStore.user.id, gameId, this.from, this.size).subscribe({
         next: (fetchedScreenshots: IScreenshotResponse) => {
           runInAction(() => {
             this.screenshotsLoading = false;
@@ -157,7 +161,7 @@ class SelfPageStore {
     this.screenshotsLoading = true;
 
     if (this.rootStore.user) {
-      ApiService.getGameScreenshots(this.rootStore.user.id, this.activeGameTab, this.from, this.size).subscribe({
+      this.uploading$ = ApiService.getGameScreenshots(this.rootStore.user.id, this.activeGameTab, this.from, this.size).subscribe({
         next: (fetchedScreenshots: IScreenshotResponse) => {
           runInAction(() => {
             this.screenshotsLoading = false;

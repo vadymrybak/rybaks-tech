@@ -4,6 +4,7 @@ import { inject, Types } from "@biorate/inversion";
 import { ApiOperation } from "@nestjs/swagger";
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
   Logger,
@@ -96,6 +97,7 @@ export class UIController {
     @Param("gameid", new ParseIntPipe()) gameid: number,
     @Query("dateTaken") dateTaken: Date,
     @UserDecorator("sub") sub: number,
+    @Body("lastModified") lastModified: string[],
   ) {
     if (userid !== sub) {
       throw new UnauthorizedException();
@@ -105,6 +107,6 @@ export class UIController {
     }
     this.logger.debug(`(uploadFile) Incoming request. userid: ${userid}, gameid: ${gameid}, files length: ${files.length}, dateTaken: ${dateTaken}`);
 
-    return this.uiService.uploadFiles(files, gameid, userid, dateTaken);
+    return this.uiService.uploadFiles(files, gameid, userid, lastModified);
   }
 }

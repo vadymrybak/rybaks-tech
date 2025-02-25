@@ -1,4 +1,4 @@
-import { Avatar, Box, Drawer, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+import { Avatar, Box, Drawer, List, ListItem, ListItemButton, ListItemText, Tooltip } from "@mui/material";
 import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStores } from "../../stores/RootStore";
@@ -43,6 +43,7 @@ const UserGames = observer(() => {
                       selfPageStore.handleTabChange(game.id);
                     }}
                   >
+                    <Tooltip title={game.name} placement="right" enterDelay={500}>
                     <ListItemText
                       sx={{ display: "flex", justifyContent: "center" }}
                       primary={
@@ -53,6 +54,7 @@ const UserGames = observer(() => {
                         )
                       }
                     />
+                    </Tooltip>
                   </ListItemButton>
                 </ListItem>
               ))}

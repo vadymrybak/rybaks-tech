@@ -29,13 +29,21 @@ export class AuthService {
         throw new ForbiddenException();
       }
 
+      this.logger.debug(`(signin) Got use from DB`);
+      this.logger.debug(`(signin) argon verify...`);
+
       const pwMatches = await argon.verify(user.hash, dto.password);
+
+      this.logger.debug(`(signin) argon verified`);
 
       if (!pwMatches) {
         throw new ForbiddenException("Invalid credentials");
       }
 
-      return await this.signToken(user.id, user.email);
+      this.logger.debug(`(signin) argon verified`);
+      const token = await this.signToken(user.id, user.email);
+      this.logger.debug(`(signin) token signed`);
+      return token;
     } catch (error) {
       this.logger.error(error);
       if (error instanceof ForbiddenException) {
